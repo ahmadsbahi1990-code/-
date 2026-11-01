@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kenz Kids — المخزون والطلبات</title>
+<style>
+:root{--green:#285e50;--ink:#263c36;--muted:#788880;--line:#e5ece7}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f8f6;color:var(--ink);font:14px Tahoma,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:8px;padding:11px 15px}
+button:disabled{opacity:.5;cursor:wait}
+button:focus-visible{outline:3px solid #c49b64;outline-offset:3px}
+[hidden]{display:none!important}
+header{background:var(--green);color:white;padding:24px max(20px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}
+header strong{font:30px Georgia,serif}
+header small{display:block;margin-top:7px;color:#dbe8df}
+main{max-width:1220px;margin:auto;padding:25px 20px}
+nav{display:flex;gap:10px;margin-bottom:25px}
+nav button{background:white;color:var(--green);border:1px solid var(--line)}
+nav button.active,.primary{background:var(--green);color:white}
+.secondary{background:#edf3ee;color:var(--green)}
+.danger{background:#fff0ec;color:#ad493b}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:23px}
+h1{font-size:26px;margin:0 0 10px}
+h2{font-size:18px;margin:0}
+p{line-height:1.9}
+.muted{color:var(--muted);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}
+.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}
+.stat span,.stat small{display:block;color:var(--muted);font-size:11px}
+.stat strong{display:block;font-size:28px;margin:16px 0}
+.panel{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel-head{padding:22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;padding:0 22px 22px}
+input,select,textarea{border:1px solid #dce5de;border-radius:7px;padding:11px;background:white;color:var(--ink);min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid #b5d1bf}
+.filters input{flex:1;min-width:200px}
+.filters select{min-width:125px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;text-align:right;white-space:nowrap}
+th{background:#f7faf6;color:var(--muted);font-size:11px;font-weight:normal}
+th,td{padding:16px 20px;border-bottom:1px solid #edf1ed}
+td{font-size:12px}
+td small{display:block;margin-top:7px;color:var(--muted)}
+.model{display:flex;align-items:center;gap:12px}
+.model img{width:64px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.placeholder{width:42px;height:46px;display:grid;place-items:center;background:#f2eee7;border-radius:8px;color:#a58b65}
+.status{display:inline-block;padding:6px 10px;border-radius:20px;font-size:11px;background:#edf6ef;color:#4e7d5c}
+.status.low{background:#fff3d7;color:#9b7627}
+.status.out{background:#f1eeee;color:#947f7a}
+.actions{display:flex;gap:6px}
+.actions button{padding:8px 10px;background:#f0f5ef;color:var(--green);font-size:11px}
+.empty{text-align:center;padding:45px 20px;color:var(--muted)}
+.panel-foot{padding:15px 22px;color:var(--muted);font-size:11px}
+.backup{margin-top:24px;background:#edf3ec;border:1px solid #e0e8de;padding:20px;border-radius:12px;display:flex;gap:20px;align-items:center;justify-content:space-between}
+.backup strong{font-size:12px}
+.backup p{margin:7px 0 0}
+.backup-actions{display:flex;gap:8px;flex-wrap:wrap}
+dialog{width:530px;max-width:calc(100% - 24px);max-height:92vh;overflow:auto;border:1px solid #dce6dc;border-radius:14px;padding:25px;color:var(--ink)}
+dialog::backdrop{background:#17372a77}
+.dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.close{font-size:22px;background:#f0f4ee;padding:3px 10px;color:#6d8071}
+form label{display:flex;flex-direction:column;gap:8px;margin-bottom:17px;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px;margin-top:20px}
+.error{color:#ad4437;font-size:12px;line-height:1.9}
+.error:empty{display:none}
+.photo-preview{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.photo-preview img,.detail-photo{width:110px;height:120px;object-fit:contain;border-radius:8px;background:#f1f5ef}
+.detail-photo{display:block;margin-bottom:18px}
+.total{padding:15px;background:#eef5ed;border-radius:8px;margin-bottom:18px;display:flex;justify-content:space-between}
+.details{background:#f4f7f2;border-radius:8px;padding:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:2;font-size:12px;margin-bottom:20px}
+#message{position:fixed;bottom:22px;left:22px;z-index:10;max-width:calc(100% - 44px);background:#244f3f;color:white;padding:16px 22px;border-radius:10px;line-height:1.8;box-shadow:0 5px 25px #163a3022}
+footer{text-align:center;padding:25px;color:#95a297;font-size:11px}
+@media(max-width:750px){
+.stats{grid-template-columns:1fr 1fr}
+.stat{padding:18px}
+.backup{align-items:flex-start;flex-direction:column}
+header strong{font-size:25px}
+.heading h1{font-size:23px}
+.filters{padding-inline:15px}
+.filters input{flex-basis:100%}
+.filters select{flex:1;min-width:90px}
+th,td{padding:14px}
+}
+@media(max-width:420px){.grid{grid-template-columns:1fr;gap:0}.heading{align-items:flex-start}.heading .primary{font-size:12px}main{padding-inline:12px}}
+</style>
+</head>
+<body>
+<header>
+<div><strong dir="ltr">kenz kids ✦</strong><small>كل قطعة إلها مكان</small></div>
+<span id="today"></span>
+</header>
+<main>
+<nav aria-label="القائمة الرئيسية">
+<button type="button" class="active" data-view="inventory">المخزون</button>
+<button type="button" data-view="orders">المبيعات والتوصيل</button>
+</nav>
+
+<div class="heading">
+<div><h1 id="page-title">المخزون</h1><div class="muted">رتّبي القطع وتابعي البيع والتوصيل بمكان واحد.</div></div>
+<button type="button" class="primary" id="main-add">＋ إضافة قطعة</button>
+</div>
+
+<section class="stats" aria-label="ملخص المتجر">
+<div class="stat"><span>القطع المتوفرة</span><strong id="stock-count">0</strong><small>قطعة جاهزة للبيع</small></div>
+<div class="stat"><span>المبيعات المسجّلة</span><strong id="sales-total">0</strong><small>دون رسوم التوصيل والطلبات الملغاة</small></div>
+<div class="stat"><span>بانتظار التوصيل</span><strong id="pending-count">0</strong><small>طلبات جديدة أو قيد التوصيل</small></div>
+<div class="stat"><span>مخزون منخفض</span><strong id="low-count">0</strong><small>قطعة واحدة متبقية لكل صنف</small></div>
+</section>
+
+<section class="panel" id="inventory-view">
+<div class="panel-head"><h2>قطع المتجر</h2><button type="button" class="secondary" id="new-sale">تسجيل بيع</button></div>
+<div class="filters">
+<input id="search" type="search" placeholder="ابحثي بالموديل أو اللون أو المقاس…" aria-label="البحث في المخزون">
+<select id="color-filter" aria-label="اللون"><option value="">كل الألوان</option></select>
+<select id="size-filter" aria-label="المقاس"><option value="">كل المقاسات</option></select>
+<select id="stock-filter" aria-label="التوفر">
+<option value="">كل الحالات</option><option value="available">متوفر</option><option value="low">قطعة واحدة</option><option value="out">نفد المخزون</option>
+</select>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>الموديل</th><th>اللون</th><th>المقاس</th><th>سعر القطعة</th><th>الكمية</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+<tbody id="inventory-body"></tbody>
+</table>
+</div>
+<div class="empty" id="inventory-empty">لا توجد قطع لعرضها. أضيفي قطعة أو غيّري البحث والفلاتر.</div>
+<div class="panel-foot" id="inventory-summary"></div>
+</section>
+
+<section class="panel" id="orders-view" hidden>
+<div class="panel-head"><h2>المبيعات والتوصيل</h2><button type="button" class="secondary" id="order-sale">＋ تسجيل بيع</button></div>
+<div class="filters">
+<input id="order-search" type="search" placeholder="اسم العميل، الهاتف، الموديل أو رقم الطلب…" aria-label="البحث في الطلبات">
+<select id="status-filter" aria-label="حالة الطلب"><option value="">كل الحالات</option><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option><option>ملغي</option></select>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>الطلب</th><th>العميل</th><th>القطعة</th><th>الإجمالي</th><th>التوصيل والدفع</th><th>إجراءات</th></tr></thead>
+<tbody id="orders-body"></tbody>
+</table>
+</div>
+<div class="empty" id="orders-empty">لا توجد طلبات مطابقة.</div>
+<div class="panel-foot">إلغاء الطلب يعيد الكمية إلى المخزون مرة واحدة. أي رد مالي يُتابع خارج الأداة.</div>
+</section>
+
+<section class="backup">
+<div><strong>البيانات محفوظة في هذا المتصفح فقط</strong><p class="muted">صدّري نسخة احتياطية بانتظام. لا توجد مزامنة بين الأجهزة. استخدمي عملة واحدة لجميع الأسعار.</p></div>
+<div class="backup-actions"><button type="button" class="secondary" id="export">تصدير نسخة احتياطية</button><button type="button" class="secondary" id="import">استعادة نسخة</button></div>
+<input id="import-file" type="file" accept=".json,application/json" hidden>
+</section>
+<footer>Kenz Kids · تفاصيل صغيرة، فرق كبير</footer>
+</main>
+
+<dialog id="item-dialog">
+<form id="item-form">
+<div class="dialog-head"><h2 id="item-title">إضافة قطعة</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
+<input type="hidden" name="id">
+<label>صورة الموديل
+<input id="item-photo" type="file" accept="image/jpeg,image/png,image/webp">
+<span class="muted">يمكنك إضافة صورة بدل كتابة الاسم. تُضغط الصورة تلقائياً.</span>
+</label>
+<div class="photo-preview" id="photo-preview" hidden><img alt="معاينة صورة الموديل"><button type="button" class="secondary" id="remove-photo">إزالة الصورة</button></div>
+<label>اسم الموديل — اختياري عند وجود صورة<input name="model" maxlength="100" placeholder="مثلاً: طقم قطن صيفي"></label>
+<div class="grid">
+<label>اللون<input name="color" required maxlength="60"></label>
+<label>المقاس<input name="size" required maxlength="40" placeholder="مثلاً: 2–3 سنوات"></label>
+<label>سعر القطعة<input name="price" type="number" min="0" max="1000000000" step="0.01" required></label>
+<label>الكمية المتوفرة<input name="quantity" type="number" min="0" max="1000000" step="1" required></label>
+</div>
+<p class="muted">تعديل الكمية يحدد الرصيد الحالي مباشرةً. كل موديل ولون ومقاس يُسجّل كصنف مستقل.</p>
+<p id="item-error" class="error" role="alert"></p>
+<div class="form-actions"><button type="submit" class="primary">حفظ القطعة</button><button type="button" class="secondary" data-close>إلغاء</button></div>
+</form>
+</dialog>
+
+<dialog id="sale-dialog">
+<form id="sale-form">
+<div class="dialog-head"><h2>تسجيل بيع</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
+<label>القطعة<select name="itemId" id="sale-item" required></select></label>
+<img class="detail-photo" id="sale-photo" alt="صورة القطعة المختارة" hidden>
+<div class="grid">
+<label>الكمية<input name="quantity" type="number" min="1" step="1" value="1" required></label>
+<label>رسوم التوصيل<input name="deliveryFee" type="number" min="0" max="1000000000" step="0.01" value="0" required></label>
+</div>
+<div class="total"><span>الإجمالي مع التوصيل</span><strong id="sale-total">0</strong></div>
+<div class="grid">
+<label>اسم العميل<input name="customer" required maxlength="100"></label>
+<label>رقم الهاتف — اختياري<input name="phone" type="tel" maxlength="40" dir="ltr"></label>
+</div>
+<label>عنوان التوصيل — اختياري<textarea name="address" rows="2" maxlength="500"></textarea></label>
+<div class="grid">
+<label>حالة الطلب<select name="status"><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option></select></label>
+<label>حالة الدفع<select name="payment"><option>غير مدفوع</option><option>مدفوع</option></select></label>
+</div>
+<label>ملاحظات — اختياري<textarea name="notes" rows="2" maxlength="500"></textarea></label>
+<p id="sale-error" class="error" role="alert"></p>
+<div class="form-actions"><button type="submit" class="primary">تأكيد البيع وخصم المخزون</button><button type="button" class="secondary" data-close>إلغاء</button></div>
+</form>
+</dialog>
+
+<dialog id="order-dialog">
+<form id="order-form">
+<div class="dialog-head"><h2>تفاصيل الطلب</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
+<img id="order-photo" class="detail-photo" alt="صورة الموديل في الطلب" hidden>
+<div id="order-details" class="details"></div>
+<input type="hidden" name="id">
+<div class="grid">
+<label>حالة الطلب<select name="status"><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option></select></label>
+<label>حالة الدفع<select name="payment"><option>غير مدفوع</option><option>مدفوع</option></select></label>
+</div>
+<p id="order-error" class="error" role="alert"></p>
+<div class="form-actions"><button type="submit" class="primary">حفظ التحديث</button><button type="button" class="danger" id="cancel-order">إلغاء الطلب وإرجاع الكمية</button></div>
+</form>
+</dialog>
+
+<div id="message" role="status" hidden></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const STORE='kenz-kids-v1';
+const statuses=['جديد','قيد التوصيل','تم التوصيل','ملغي'];
+const payments=['غير مدفوع','مدفوع'];
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>new Intl.NumberFormat('ar',{maximumFractionDigits:2}).format(v);
+const round=v=>Math.round((v+Number.EPSILON)*100)/100;
+const itemKey=i=>[i.photo||i.model.trim().toLowerCase(),i.color.trim().toLowerCase(),i.size.trim().toLowerCase()].join('\u0000');
+const blank=()=>({version:1,items:[],orders:[]});
+let state=blank(),storageBroken=false,view='inventory',photo='',photoToken=0,messageTimer;
+
+function newId(){
+ if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+ if(globalThis.crypto?.getRandomValues)return Array.from(crypto.getRandomValues(new Uint8Array(16)),v=>v.toString(16).padStart(2,'0')).join('');
+ return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);
+}
+function validText(v,max,required=true){return typeof v==='string'&&v.length<=max&&(!required||v.trim().length>0);}
+function validNumber(v,max,integer=false){return typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max&&(!integer||Number.isSafeInteger(v));}
+function validPhoto(v){return v===undefined||v===''||(typeof v==='string'&&v.length<=400000&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(v));}
+function validate(d){
+ if(!d||d.version!==1||!Array.isArray(d.items)||!Array.isArray(d.orders))throw Error('صيغة النسخة غير صالحة.');
+ const ids=new Set(),keys=new Set(),orderIds=new Set(),numbers=new Set();
+ for(const i of d.items){
+  if(!i||!validText(i.id,100)||ids.has(i.id)||!validText(i.model,100)||!validText(i.color,60)||!validText(i.size,40)||!validNumber(i.price,1e9)||!validNumber(i.quantity,1e6,true)||!validPhoto(i.photo))throw Error('توجد بيانات مخزون غير صالحة.');
+  if(keys.has(itemKey(i)))throw Error('توجد أصناف مكررة في النسخة.');
+  ids.add(i.id);keys.add(itemKey(i));
+ }
+ for(const o of d.orders){
+  if(!o||!validText(o.id,100)||orderIds.has(o.id)||!Number.isSafeInteger(o.number)||o.number<1||numbers.has(o.number)||!ids.has(o.itemId)||!validText(o.model,100)||!validText(o.color,60)||!validText(o.size,40)||!validText(o.customer,100)||!validText(o.phone,40,false)||!validText(o.address,500,false)||!validText(o.notes,500,false)||!validNumber(o.quantity,1e6,true)||o.quantity===0||!validNumber(o.price,1e9)||!validNumber(o.deliveryFee,1e9)||!statuses.includes(o.status)||!payments.includes(o.payment)||!validPhoto(o.photo)||typeof o.date!=='string'||!Number.isFinite(Date.parse(o.date)))throw Error('توجد بيانات طلبات غير صالحة.');
+  orderIds.add(o.id);numbers.add(o.number);
+ }
+ return d;
+}
+try{const raw=localStorage.getItem(STORE);if(raw)state=validate(JSON.parse(raw));}catch{storageBroken=true;}
+function say(text){
+ $('#message').textContent=text;$('#message').hidden=false;
+ clearTimeout(messageTimer);messageTimer=setTimeout(()=>$('#message').hidden=true,7000);
+}
+function save(next){
+ if(storageBroken)throw Error('تعذّرت قراءة التخزين. افتحي الأداة في متصفح عادي يسمح بحفظ البيانات، أو استعيدي نسخة احتياطية سليمة.');
+ validate(next);
+ try{localStorage.setItem(STORE,JSON.stringify(next));}catch{throw Error('تعذّر الحفظ. قد تكون مساحة المتصفح ممتلئة أو التخزين محظوراً. صدّري نسخة احتياطية.');}
+ state=next;render();
+}
+function update(change){const next=JSON.parse(JSON.stringify(state));change(next);save(next);}
+function imageMarkup(p,label){return p?`<img src="${esc(p)}" alt="${esc(label)}" loading="lazy">`:'<span class="placeholder">♧</span>';}
+function showPhoto(selector,p){$(selector).hidden=!p;if(p)$(selector).src=p;else $(selector).removeAttribute('src');}
+function setView(next){
+ view=next;
+ $('#inventory-view').hidden=next!=='inventory';$('#orders-view').hidden=next!=='orders';
+ document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));
+ $('#page-title').textContent=next==='inventory'?'المخزون':'المبيعات والتوصيل';
+ $('#main-add').textContent=next==='inventory'?'＋ إضافة قطعة':'＋ تسجيل بيع';
+}
+function options(selector,field,label){
+ const previous=$(selector).value;
+ const values=[...new Set(state.items.map(i=>i[field]))].sort((a,b)=>a.localeCompare(b,'ar'));
+ $(selector).innerHTML=`<option value="">${label}</option>`+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+ $(selector).value=values.includes(previous)?previous:'';
+}
+function render(){
+ const active=state.orders.filter(o=>o.status!=='ملغي');
+ $('#stock-count').textContent=fmt(state.items.reduce((s,i)=>s+i.quantity,0));
+ $('#sales-total').textContent=fmt(active.reduce((s,o)=>s+round(o.quantity*o.price),0));
+ $('#pending-count').textContent=fmt(active.filter(o=>o.status!=='تم التوصيل').length);
+ $('#low-count').textContent=fmt(state.items.filter(i=>i.quantity===1).length);
+ options('#color-filter','color','كل الألوان');options('#size-filter','size','كل المقاسات');
+ renderInventory();renderOrders();
+}
+function renderInventory(){
+ const q=$('#search').value.trim().toLowerCase(),stock=$('#stock-filter').value;
+ const items=state.items.filter(i=>[i.model,i.color,i.size].join(' ').toLowerCase().includes(q)
+  &&(!$('#color-filter').value||i.color===$('#color-filter').value)
+  &&(!$('#size-filter').value||i.size===$('#size-filter').value)
+  &&(!stock||(stock==='available'&&i.quantity>0)||(stock==='low'&&i.quantity===1)||(stock==='out'&&i.quantity===0)))
+ .sort((a,b)=>a.model.localeCompare(b.model,'ar',{numeric:true})||a.color.localeCompare(b.color,'ar')||a.size.localeCompare(b.size,'ar',{numeric:true}));
+ $('#inventory-body').innerHTML=items.map(i=>`<tr>
+ <td><div class="model">${imageMarkup(i.photo,i.model)}<strong>${esc(i.model)}</strong></div></td>
+ <td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${fmt(i.price)}</td><td>${fmt(i.quantity)}</td>
+ <td><span class="status ${i.quantity===0?'out':i.quantity===1?'low':''}">${i.quantity===0?'نفد المخزون':i.quantity===1?'قطعة واحدة متبقية':'متوفر'}</span></td>
+ <td><div class="actions"><button type="button" data-sell="${esc(i.id)}" ${i.quantity===0?'disabled':''}>بيع</button><button type="button" data-edit="${esc(i.id)}">تعديل</button></div></td></tr>`).join('');
+ $('#inventory-empty').hidden=items.length>0;
+ $('#inventory-summary').textContent=`عرض ${fmt(items.length)} من ${fmt(state.items.length)} أصناف. تُخصم الكمية تلقائياً عند تسجيل البيع.`;
+}
+function renderOrders(){
+ const q=$('#order-search').value.trim().toLowerCase(),status=$('#status-filter').value;
+ const orders=state.orders.filter(o=>[o.customer,o.phone,o.model,o.number,'KK-'+o.number].join(' ').toLowerCase().includes(q)&&(!status||o.status===status)).sort((a,b)=>b.number-a.number);
+ $('#orders-body').innerHTML=orders.map(o=>`<tr>
+ <td><strong dir="ltr">KK-${o.number}</strong><small>${new Date(o.date).toLocaleDateString('ar')}</small></td>
+ <td><strong>${esc(o.customer)}</strong><small dir="ltr">${esc(o.phone)}</small></td>
+ <td><div class="model">${imageMarkup(o.photo,o.model)}<span>${esc(o.model)}<small>${esc(o.color)} · ${esc(o.size)} · ${fmt(o.quantity)} قطعة</small></span></div></td>
+ <td>${fmt(round(o.quantity*o.price+o.deliveryFee))}<small>التوصيل: ${fmt(o.deliveryFee)}</small></td>
+ <td><span class="status ${o.status==='ملغي'?'out':o.status==='تم التوصيل'?'':'low'}">${o.status}</span><small>${o.payment}${o.status==='ملغي'&&o.payment==='مدفوع'?' · تابعي رد المبلغ':''}</small></td>
+ <td><div class="actions"><button type="button" data-order="${esc(o.id)}">التفاصيل</button></div></td></tr>`).join('');
+ $('#orders-empty').hidden=orders.length>0;
+}
+function photoPreview(){
+ $('#photo-preview').hidden=!photo;
+ showPhoto('#photo-preview img',photo);
+}
+function openItem(id){
+ photoToken++;
+ const form=$('#item-form'),item=state.items.find(i=>i.id===id);
+ form.reset();form.elements.id.value=id||'';
+ photo=item?.photo||'';photoPreview();
+ form.querySelector('[type=submit]').disabled=false;
+ $('#item-error').textContent='';$('#item-title').textContent=item?'تعديل القطعة':'إضافة قطعة';
+ if(item)for(const field of ['model','color','size','price','quantity'])form.elements[field].value=item[field];
+ $('#item-dialog').showModal();
+}
+$('#item-form').addEventListener('submit',e=>{
+ e.preventDefault();const f=e.target;
+ try{
+  if(!f.elements.model.value.trim()&&!photo)throw Error('أضيفي صورة للموديل أو اكتبي اسمه.');
+  const id=f.elements.id.value||newId();
+  const item={id,model:f.elements.model.value.trim()||'موديل مصوّر '+id.slice(-6),photo,color:f.elements.color.value.trim(),size:f.elements.size.value.trim(),price:round(Number(f.elements.price.value)),quantity:Number(f.elements.quantity.value)};
+  if(state.items.some(i=>i.id!==id&&itemKey(i)===itemKey(item)))throw Error('هذا الموديل واللون والمقاس مسجّل بالفعل. عدّلي كميته من المخزون.');
+  update(next=>{const index=next.items.findIndex(i=>i.id===id);if(index<0)next.items.push(item);else next.items[index]=item;});
+  $('#item-dialog').close();say('تم حفظ القطعة بنجاح');
+ }catch(error){$('#item-error').textContent=error.message;}
+});
+function decodeImage(file){
+ return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(file),img=new Image();
+  const timer=setTimeout(()=>{img.onload=img.onerror=null;URL.revokeObjectURL(url);reject(Error('استغرقت قراءة الصورة وقتاً طويلاً. جرّبي صورة أصغر.'));},15000);
+  img.onload=()=>{clearTimeout(timer);URL.revokeObjectURL(url);resolve(img);};
+  img.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(url);reject(Error('تعذّرت قراءة الصورة. اختاري صورة أخرى.'));};
+  img.src=url;
+ });
+}
+$('#item-photo').addEventListener('change',async e=>{
+ const file=e.target.files[0],token=++photoToken;if(!file)return;
+ const submit=$('#item-form [type=submit]');submit.disabled=true;$('#item-error').textContent='';
+ try{
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('اختاري صورة JPEG أو PNG أو WebP.');
+  if(file.size>10*1024*1024)throw Error('اختاري صورة أصغر من 10 ميغابايت.');
+  const img=await decodeImage(file);
+  const scale=Math.min(1,640/Math.max(img.naturalWidth,img.naturalHeight));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  const result=canvas.toDataURL('image/jpeg',.75);
+  if(!validPhoto(result))throw Error('الصورة كبيرة بعد الضغط. اختاري صورة أصغر أو أبسط.');
+  if(token!==photoToken)return;
+  photo=result;photoPreview();
+ }catch(error){if(token===photoToken)$('#item-error').textContent=error.message;}
+ finally{if(token===photoToken){submit.disabled=false;e.target.value='';}}
+});
+$('#remove-photo').onclick=()=>{
+ photoToken++;photo='';photoPreview();$('#item-photo').value='';
+ $('#item-form [type=submit]').disabled=false;
+};
+function saleTotal(){
+ const f=$('#sale-form'),item=state.items.find(i=>i.id===f.elements.itemId.value);
+ f.elements.quantity.max=item?.quantity||1;showPhoto('#sale-photo',item?.photo);
+ const total=round((item?.price||0)*Number(f.elements.quantity.value)+Number(f.elements.deliveryFee.value));
+ $('#sale-total').textContent=Number.isFinite(total)?fmt(total):'—';
+}
+function openSale(id){
+ const available=state.items.filter(i=>i.quantity>0);
+ if(!available.length){say('أضيفي قطعاً متوفرة إلى المخزون أولاً.');return;}
+ $('#sale-form').reset();$('#sale-error').textContent='';
+ $('#sale-item').innerHTML=available.map(i=>`<option value="${esc(i.id)}">${esc(i.model)} · ${esc(i.color)} · ${esc(i.size)} (المتوفر: ${fmt(i.quantity)})</option>`).join('');
+ if(id)$('#sale-item').value=id;saleTotal();$('#sale-dialog').showModal();
+}
+$('#sale-form').addEventListener('input',saleTotal);
+$('#sale-form').addEventListener('change',saleTotal);
+$('#sale-form').addEventListener('submit',e=>{
+ e.preventDefault();const v=Object.fromEntries(new FormData(e.target));
+ try{
+  update(next=>{
+   const item=next.items.find(i=>i.id===v.itemId),quantity=Number(v.quantity);
+   if(!item||!Number.isSafeInteger(quantity)||quantity<1||quantity>item.quantity)throw Error('الكمية المطلوبة غير متوفرة.');
+   const number=next.orders.reduce((max,o)=>Math.max(max,o.number),0)+1;
+   next.orders.push({id:newId(),number,itemId:item.id,model:item.model,photo:item.photo||'',color:item.color,size:item.size,price:item.price,quantity,deliveryFee:round(Number(v.deliveryFee)),customer:v.customer.trim(),phone:v.phone.trim(),address:v.address.trim(),notes:v.notes.trim(),status:v.status,payment:v.payment,date:new Date().toISOString()});
+   item.quantity-=quantity;
+  });
+  $('#sale-dialog').close();setView('orders');say('تم تسجيل البيع وخصم الكمية');
+ }catch(error){$('#sale-error').textContent=error.message;}
+});
+function openOrder(id){
+ const o=state.orders.find(o=>o.id===id),f=$('#order-form');if(!o)return;
+ f.elements.id.value=id;f.elements.status.value=o.status==='ملغي'?'جديد':o.status;f.elements.payment.value=o.payment;
+ f.elements.status.disabled=o.status==='ملغي';f.elements.payment.disabled=o.status==='ملغي';
+ f.querySelector('[type=submit]').hidden=o.status==='ملغي';$('#cancel-order').hidden=o.status==='ملغي';$('#order-error').textContent='';
+ showPhoto('#order-photo',o.photo);
+ $('#order-details').textContent=
+ `KK-${o.number} · ${new Date(o.date).toLocaleDateString('ar')}
+العميل: ${o.customer}
+الهاتف: ${o.phone||'غير محدد'}
+الموديل: ${o.model}
+اللون: ${o.color} · المقاس: ${o.size}
+الكمية: ${fmt(o.quantity)} · سعر القطعة: ${fmt(o.price)}
+التوصيل: ${fmt(o.deliveryFee)}
+الإجمالي: ${fmt(round(o.quantity*o.price+o.deliveryFee))}
+الحالة: ${o.status} · ${o.payment}
+العنوان: ${o.address||'غير محدد'}
+الملاحظات: ${o.notes||'لا توجد'}${o.status==='ملغي'&&o.payment==='مدفوع'?'\nهذا الطلب مدفوع. تابعي رد المبلغ للعميل خارج الأداة.':''}`;
+ $('#order-dialog').showModal();
+}
+$('#order-form').addEventListener('submit',e=>{
+ e.preventDefault();const f=e.target;
+ try{
+  update(next=>{
+   const o=next.orders.find(o=>o.id===f.elements.id.value);
+   if(!o||o.status==='ملغي')throw Error('لا يمكن تعديل طلب ملغي.');
+   o.status=f.elements.status.value;o.payment=f.elements.payment.value;
+  });
+  $('#order-dialog').close();say('تم تحديث حالة الطلب');
+ }catch(error){$('#order-error').textContent=error.message;}
+});
+$('#cancel-order').onclick=()=>{
+ if(!confirm('إلغاء الطلب وإرجاع الكمية للمخزون؟ إذا كان مدفوعاً، تابعي رد المبلغ للعميل.'))return;
+ try{
+  update(next=>{
+   const o=next.orders.find(o=>o.id===$('#order-form').elements.id.value);
+   if(!o||o.status==='ملغي')throw Error('هذا الطلب ملغي بالفعل.');
+   const item=next.items.find(i=>i.id===o.itemId);if(!item)throw Error('لم يتم العثور على الصنف.');
+   item.quantity+=o.quantity;o.status='ملغي';
+  });
+  $('#order-dialog').close();say('تم إلغاء الطلب وإرجاع الكمية للمخزون');
+ }catch(error){$('#order-error').textContent=error.message;}
+};
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.hasAttribute('data-close'))b.closest('dialog').close();
+ if(b.dataset.view)setView(b.dataset.view);
+ if(b.dataset.edit)openItem(b.dataset.edit);
+ if(b.dataset.sell)openSale(b.dataset.sell);
+ if(b.dataset.order)openOrder(b.dataset.order);
+});
+$('#main-add').onclick=()=>view==='inventory'?openItem():openSale();
+$('#new-sale').onclick=()=>openSale();$('#order-sale').onclick=()=>openSale();
+for(const id of ['search','color-filter','size-filter','stock-filter'])$('#'+id).addEventListener('input',renderInventory);
+for(const id of ['order-search','status-filter'])$('#'+id).addEventListener('input',renderOrders);
+for(const type of ['item','sale','order']){
+ $('#'+type+'-form').addEventListener('invalid',e=>{
+  const field=e.target,label=field.closest('label')?.firstChild.textContent.trim()||'الحقل';
+  let text=`راجعي قيمة «${label}».`;
+  if(field.validity.valueMissing)text=`يرجى تعبئة «${label}» قبل الحفظ.`;
+  else if(field.validity.rangeUnderflow)text=`قيمة «${label}» يجب ألا تقل عن ${field.min}.`;
+  else if(field.validity.rangeOverflow)text=`قيمة «${label}» يجب ألا تتجاوز ${field.max}.`;
+  else if(field.validity.stepMismatch)text=field.step==='1'?`أدخلي عدداً صحيحاً في «${label}».`:`أدخلي السعر بمنزلتين عشريتين كحد أقصى في «${label}».`;
+  $('#'+type+'-error').textContent=text;
+ },true);
+}
+$('#export').onclick=()=>{
+ if(storageBroken){say('تعذّرت قراءة البيانات السابقة. لن يتم تصدير بيانات فارغة بدلاً منها.');return;}
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='kenz-kids-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);say('تم تصدير النسخة. احتفظي بها في مكان آمن؛ تتضمن بيانات العملاء والصور.');
+};
+$('#import').onclick=()=>$('#import-file').click();
+$('#import-file').addEventListener('change',async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  if(file.size>10*1024*1024)throw Error('الملف أكبر من 10 ميغابايت.');
+  const next=validate(JSON.parse(await file.text()));
+  if(!confirm(`استعادة ${next.items.length} أصناف و${next.orders.length} طلبات؟ ستُستبدل البيانات الحالية بالكامل. صدّري نسخة منها أولاً إن كنت تحتاجينها.`))return;
+  const wasBroken=storageBroken;storageBroken=false;
+  try{save(next);}catch(error){storageBroken=wasBroken;throw error;}
+  say('تمت استعادة النسخة الاحتياطية');
+ }catch(error){say('لم يتم الاستيراد: '+(error instanceof SyntaxError?'الملف ليس نسخة JSON صالحة.':error.message));}
+ finally{e.target.value='';}
+});
+window.addEventListener('storage',e=>{
+ if(e.key!==STORE&&e.key!==null)return;
+ try{
+  state=e.newValue?validate(JSON.parse(e.newValue)):blank();storageBroken=false;photoToken++;
+  document.querySelectorAll('dialog[open]').forEach(d=>d.close());render();say('تم تحديث البيانات من نافذة أخرى. راجعيها قبل المتابعة.');
+ }catch{storageBroken=true;say('توجد بيانات غير صالحة في التخزين. استعيدي نسخة سليمة للمتابعة.');}
+});
+$('#today').textContent=new Date().toLocaleDateString('ar',{year:'numeric',month:'short',day:'numeric'});
+render();
+if(storageBroken)say('تعذّرت قراءة البيانات المحفوظة. افتحي الملف في Chrome مع السماح بالتخزين. لم يتم تغيير بياناتك السابقة.');
+</script>
+</body>
+</html>
