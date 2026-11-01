@@ -3,222 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#285e50">
 <title>Kenz Kids — المخزون والطلبات</title>
 <style>
 :root{--green:#285e50;--ink:#263c36;--muted:#788880;--line:#e5ece7}
-*{box-sizing:border-box}
-body{margin:0;background:#f6f8f6;color:var(--ink);font:14px Tahoma,Arial,sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer;border:0;border-radius:8px;padding:11px 15px}
-button:disabled{opacity:.5;cursor:wait}
-button:focus-visible{outline:3px solid #c49b64;outline-offset:3px}
-[hidden]{display:none!important}
-header{background:var(--green);color:white;padding:24px max(20px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}
-header strong{font:30px Georgia,serif}
-header small{display:block;margin-top:7px;color:#dbe8df}
-main{max-width:1220px;margin:auto;padding:25px 20px}
-nav{display:flex;gap:10px;margin-bottom:25px}
-nav button{background:white;color:var(--green);border:1px solid var(--line)}
-nav button.active,.primary{background:var(--green);color:white}
-.secondary{background:#edf3ee;color:var(--green)}
-.danger{background:#fff0ec;color:#ad493b}
-.heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:23px}
-h1{font-size:26px;margin:0 0 10px}
-h2{font-size:18px;margin:0}
-p{line-height:1.9}
-.muted{color:var(--muted);font-size:12px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}
-.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}
-.stat span,.stat small{display:block;color:var(--muted);font-size:11px}
-.stat strong{display:block;font-size:28px;margin:16px 0}
-.panel{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.panel-head{padding:22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.filters{display:flex;flex-wrap:wrap;gap:10px;padding:0 22px 22px}
-input,select,textarea{border:1px solid #dce5de;border-radius:7px;padding:11px;background:white;color:var(--ink);min-width:0}
-input:focus,select:focus,textarea:focus{outline:2px solid #b5d1bf}
-.filters input{flex:1;min-width:200px}
-.filters select{min-width:125px}
-.table-wrap{overflow:auto}
-table{width:100%;border-collapse:collapse;text-align:right;white-space:nowrap}
-th{background:#f7faf6;color:var(--muted);font-size:11px;font-weight:normal}
-th,td{padding:16px 20px;border-bottom:1px solid #edf1ed}
-td{font-size:12px}
-td small{display:block;margin-top:7px;color:var(--muted)}
-.model{display:flex;align-items:center;gap:12px}
-.model img{width:64px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-.placeholder{width:42px;height:46px;display:grid;place-items:center;background:#f2eee7;border-radius:8px;color:#a58b65}
-.status{display:inline-block;padding:6px 10px;border-radius:20px;font-size:11px;background:#edf6ef;color:#4e7d5c}
-.status.low{background:#fff3d7;color:#9b7627}
-.status.out{background:#f1eeee;color:#947f7a}
-.actions{display:flex;gap:6px}
-.actions button{padding:8px 10px;background:#f0f5ef;color:var(--green);font-size:11px}
-.empty{text-align:center;padding:45px 20px;color:var(--muted)}
-.panel-foot{padding:15px 22px;color:var(--muted);font-size:11px}
-.backup{margin-top:24px;background:#edf3ec;border:1px solid #e0e8de;padding:20px;border-radius:12px;display:flex;gap:20px;align-items:center;justify-content:space-between}
-.backup strong{font-size:12px}
-.backup p{margin:7px 0 0}
-.backup-actions{display:flex;gap:8px;flex-wrap:wrap}
-dialog{width:530px;max-width:calc(100% - 24px);max-height:92vh;overflow:auto;border:1px solid #dce6dc;border-radius:14px;padding:25px;color:var(--ink)}
-dialog::backdrop{background:#17372a77}
-.dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
-.close{font-size:22px;background:#f0f4ee;padding:3px 10px;color:#6d8071}
-form label{display:flex;flex-direction:column;gap:8px;margin-bottom:17px;font-size:12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.form-actions{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px;margin-top:20px}
-.error{color:#ad4437;font-size:12px;line-height:1.9}
-.error:empty{display:none}
-.photo-preview{display:flex;gap:12px;align-items:center;margin-bottom:18px}
-.photo-preview img,.detail-photo{width:110px;height:120px;object-fit:contain;border-radius:8px;background:#f1f5ef}
-.detail-photo{display:block;margin-bottom:18px}
-.total{padding:15px;background:#eef5ed;border-radius:8px;margin-bottom:18px;display:flex;justify-content:space-between}
-.details{background:#f4f7f2;border-radius:8px;padding:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:2;font-size:12px;margin-bottom:20px}
-#message{position:fixed;bottom:22px;left:22px;z-index:10;max-width:calc(100% - 44px);background:#244f3f;color:white;padding:16px 22px;border-radius:10px;line-height:1.8;box-shadow:0 5px 25px #163a3022}
-footer{text-align:center;padding:25px;color:#95a297;font-size:11px}
-@media(max-width:750px){
-.stats{grid-template-columns:1fr 1fr}
-.stat{padding:18px}
-.backup{align-items:flex-start;flex-direction:column}
-header strong{font-size:25px}
-.heading h1{font-size:23px}
-.filters{padding-inline:15px}
-.filters input{flex-basis:100%}
-.filters select{flex:1;min-width:90px}
-th,td{padding:14px}
-}
+*{box-sizing:border-box}body{margin:0;background:#f6f8f6;color:var(--ink);font:14px Tahoma,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:8px;padding:11px 15px}button:disabled{opacity:.5;cursor:wait}button:focus-visible{outline:3px solid #c49b64;outline-offset:3px}[hidden]{display:none!important}
+header{background:var(--green);color:white;padding:24px max(20px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}header strong{font:30px Georgia,serif}header small{display:block;margin-top:7px;color:#dbe8df}main{max-width:1220px;margin:auto;padding:25px 20px}nav{display:flex;gap:10px;margin-bottom:25px}nav button{background:white;color:var(--green);border:1px solid var(--line)}nav button.active,.primary{background:var(--green);color:white}.secondary{background:#edf3ee;color:var(--green)}.danger{background:#fff0ec;color:#ad493b}.heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:23px}h1{font-size:26px;margin:0 0 10px}h2{font-size:18px;margin:0}p{line-height:1.9}.muted{color:var(--muted);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.stat span,.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:28px;margin:16px 0}.panel{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}.panel-head{padding:22px;display:flex;justify-content:space-between;align-items:center;gap:12px}.filters{display:flex;flex-wrap:wrap;gap:10px;padding:0 22px 22px}input,select,textarea{border:1px solid #dce5de;border-radius:7px;padding:11px;background:white;color:var(--ink);min-width:0}input:focus,select:focus,textarea:focus{outline:2px solid #b5d1bf}.filters input{flex:1;min-width:200px}.filters select{min-width:125px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:right;white-space:nowrap}th{background:#f7faf6;color:var(--muted);font-size:11px;font-weight:normal}th,td{padding:16px 20px;border-bottom:1px solid #edf1ed}td{font-size:12px}td small{display:block;margin-top:7px;color:var(--muted)}.model{display:flex;align-items:center;gap:12px}.model img{width:64px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.placeholder{width:42px;height:46px;display:grid;place-items:center;background:#f2eee7;border-radius:8px;color:#a58b65}.status{display:inline-block;padding:6px 10px;border-radius:20px;font-size:11px;background:#edf6ef;color:#4e7d5c}.status.low{background:#fff3d7;color:#9b7627}.status.out{background:#f1eeee;color:#947f7a}.actions{display:flex;gap:6px}.actions button{padding:8px 10px;background:#f0f5ef;color:var(--green);font-size:11px}.empty{text-align:center;padding:45px 20px;color:var(--muted)}.panel-foot{padding:15px 22px;color:var(--muted);font-size:11px}
+.backup{margin-top:24px;background:#edf3ec;border:1px solid #e0e8de;padding:20px;border-radius:12px;display:flex;gap:20px;align-items:center;justify-content:space-between}.backup strong{font-size:12px}.backup p{margin:7px 0 0}.backup-actions{display:flex;gap:8px;flex-wrap:wrap}dialog{width:530px;max-width:calc(100% - 24px);max-height:92vh;overflow:auto;border:1px solid #dce6dc;border-radius:14px;padding:25px;color:var(--ink)}dialog::backdrop{background:#17372a77}.dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.close{font-size:22px;background:#f0f4ee;padding:3px 10px;color:#6d8071}form label{display:flex;flex-direction:column;gap:8px;margin-bottom:17px;font-size:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-actions{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px;margin-top:20px}.error{color:#ad4437;font-size:12px;line-height:1.9}.error:empty{display:none}.photo-preview{display:flex;gap:12px;align-items:center;margin-bottom:18px}.photo-preview img,.detail-photo{width:110px;height:120px;object-fit:contain;border-radius:8px;background:#f1f5ef}.detail-photo{display:block;margin-bottom:18px}.total{padding:15px;background:#eef5ed;border-radius:8px;margin-bottom:18px;display:flex;justify-content:space-between}.details{background:#f4f7f2;border-radius:8px;padding:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:2;font-size:12px;margin-bottom:20px}#message{position:fixed;bottom:22px;left:22px;z-index:10;max-width:calc(100% - 44px);background:#244f3f;color:white;padding:16px 22px;border-radius:10px;line-height:1.8;box-shadow:0 5px 25px #163a3022}footer{text-align:center;padding:25px;color:#95a297;font-size:11px}
+@media(max-width:750px){.stats{grid-template-columns:1fr 1fr}.stat{padding:18px}.backup{align-items:flex-start;flex-direction:column}header strong{font-size:25px}.heading h1{font-size:23px}.filters{padding-inline:15px}.filters input{flex-basis:100%}.filters select{flex:1;min-width:90px}th,td{padding:14px}}
 @media(max-width:420px){.grid{grid-template-columns:1fr;gap:0}.heading{align-items:flex-start}.heading .primary{font-size:12px}main{padding-inline:12px}}
 </style>
 </head>
 <body>
-<header>
-<div><strong dir="ltr">kenz kids ✦</strong><small>كل قطعة إلها مكان</small></div>
-<span id="today"></span>
-</header>
-<main>
-<nav aria-label="القائمة الرئيسية">
-<button type="button" class="active" data-view="inventory">المخزون</button>
-<button type="button" data-view="orders">المبيعات والتوصيل</button>
-</nav>
-
-<div class="heading">
-<div><h1 id="page-title">المخزون</h1><div class="muted">رتّبي القطع وتابعي البيع والتوصيل بمكان واحد.</div></div>
-<button type="button" class="primary" id="main-add">＋ إضافة قطعة</button>
-</div>
-
+<header><div><strong dir="ltr">kenz kids ✦</strong><small>كل قطعة إلها مكان</small></div><span id="today"></span></header>
+<noscript><p style="padding:25px">يحتاج هذا الموقع إلى تفعيل JavaScript في المتصفح.</p></noscript>
+<main hidden>
+<nav aria-label="القائمة الرئيسية"><button type="button" class="active" data-view="inventory">المخزون</button><button type="button" data-view="orders">المبيعات والتوصيل</button></nav>
+<div class="heading"><div><h1 id="page-title">المخزون</h1><div class="muted">رتّبي القطع وتابعي البيع والتوصيل بمكان واحد.</div></div><button type="button" class="primary" id="main-add">＋ إضافة قطعة</button></div>
 <section class="stats" aria-label="ملخص المتجر">
 <div class="stat"><span>القطع المتوفرة</span><strong id="stock-count">0</strong><small>قطعة جاهزة للبيع</small></div>
 <div class="stat"><span>المبيعات المسجّلة</span><strong id="sales-total">0</strong><small>دون رسوم التوصيل والطلبات الملغاة</small></div>
 <div class="stat"><span>بانتظار التوصيل</span><strong id="pending-count">0</strong><small>طلبات جديدة أو قيد التوصيل</small></div>
 <div class="stat"><span>مخزون منخفض</span><strong id="low-count">0</strong><small>قطعة واحدة متبقية لكل صنف</small></div>
 </section>
-
 <section class="panel" id="inventory-view">
 <div class="panel-head"><h2>قطع المتجر</h2><button type="button" class="secondary" id="new-sale">تسجيل بيع</button></div>
-<div class="filters">
-<input id="search" type="search" placeholder="ابحثي بالموديل أو اللون أو المقاس…" aria-label="البحث في المخزون">
-<select id="color-filter" aria-label="اللون"><option value="">كل الألوان</option></select>
-<select id="size-filter" aria-label="المقاس"><option value="">كل المقاسات</option></select>
-<select id="stock-filter" aria-label="التوفر">
-<option value="">كل الحالات</option><option value="available">متوفر</option><option value="low">قطعة واحدة</option><option value="out">نفد المخزون</option>
-</select>
-</div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>الموديل</th><th>اللون</th><th>المقاس</th><th>سعر القطعة</th><th>الكمية</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-<tbody id="inventory-body"></tbody>
-</table>
-</div>
-<div class="empty" id="inventory-empty">لا توجد قطع لعرضها. أضيفي قطعة أو غيّري البحث والفلاتر.</div>
-<div class="panel-foot" id="inventory-summary"></div>
+<div class="filters"><input id="search" type="search" placeholder="ابحثي بالموديل أو اللون أو المقاس…" aria-label="البحث في المخزون"><select id="color-filter" aria-label="اللون"><option value="">كل الألوان</option></select><select id="size-filter" aria-label="المقاس"><option value="">كل المقاسات</option></select><select id="stock-filter" aria-label="التوفر"><option value="">كل الحالات</option><option value="available">متوفر</option><option value="low">قطعة واحدة</option><option value="out">نفد المخزون</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>الموديل</th><th>اللون</th><th>المقاس</th><th>سعر القطعة</th><th>الكمية</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="inventory-body"></tbody></table></div>
+<div class="empty" id="inventory-empty">لا توجد قطع لعرضها. أضيفي قطعة أو غيّري البحث والفلاتر.</div><div class="panel-foot" id="inventory-summary"></div>
 </section>
-
 <section class="panel" id="orders-view" hidden>
 <div class="panel-head"><h2>المبيعات والتوصيل</h2><button type="button" class="secondary" id="order-sale">＋ تسجيل بيع</button></div>
-<div class="filters">
-<input id="order-search" type="search" placeholder="اسم العميل، الهاتف، الموديل أو رقم الطلب…" aria-label="البحث في الطلبات">
-<select id="status-filter" aria-label="حالة الطلب"><option value="">كل الحالات</option><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option><option>ملغي</option></select>
-</div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>الطلب</th><th>العميل</th><th>القطعة</th><th>الإجمالي</th><th>التوصيل والدفع</th><th>إجراءات</th></tr></thead>
-<tbody id="orders-body"></tbody>
-</table>
-</div>
-<div class="empty" id="orders-empty">لا توجد طلبات مطابقة.</div>
-<div class="panel-foot">إلغاء الطلب يعيد الكمية إلى المخزون مرة واحدة. أي رد مالي يُتابع خارج الأداة.</div>
+<div class="filters"><input id="order-search" type="search" placeholder="اسم العميل، الهاتف، الموديل أو رقم الطلب…" aria-label="البحث في الطلبات"><select id="status-filter" aria-label="حالة الطلب"><option value="">كل الحالات</option><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option><option>ملغي</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>الطلب</th><th>العميل</th><th>القطعة</th><th>الإجمالي</th><th>التوصيل والدفع</th><th>إجراءات</th></tr></thead><tbody id="orders-body"></tbody></table></div>
+<div class="empty" id="orders-empty">لا توجد طلبات مطابقة.</div><div class="panel-foot">إلغاء الطلب يعيد الكمية إلى المخزون مرة واحدة. أي رد مالي يُتابع خارج الأداة.</div>
 </section>
-
-<section class="backup">
-<div><strong>البيانات محفوظة في هذا المتصفح فقط</strong><p class="muted">صدّري نسخة احتياطية بانتظام. لا توجد مزامنة بين الأجهزة. استخدمي عملة واحدة لجميع الأسعار.</p></div>
-<div class="backup-actions"><button type="button" class="secondary" id="export">تصدير نسخة احتياطية</button><button type="button" class="secondary" id="import">استعادة نسخة</button></div>
-<input id="import-file" type="file" accept=".json,application/json" hidden>
-</section>
+<section class="backup"><div><strong>المخزون محفوظ في حسابك السحابي</strong><p class="muted">افتح حسابك أو حساب موظف مضاف إلى المتجر لعرض المخزون المشترك. يلزم اتصال بالإنترنت للحفظ. تُفحص التحديثات كل 15 ثانية، وتؤجّل تغييرات المخزون أثناء فتح نموذج تعديل. صدّر نسخة احتياطية بانتظام.</p></div><div class="backup-actions"><button type="button" class="secondary" id="export">تصدير نسخة احتياطية</button><button type="button" class="secondary" id="import">استعادة نسخة</button></div><input id="import-file" type="file" accept=".json,application/json" hidden></section>
 <footer>Kenz Kids · تفاصيل صغيرة، فرق كبير</footer>
 </main>
-
-<dialog id="item-dialog">
-<form id="item-form">
-<div class="dialog-head"><h2 id="item-title">إضافة قطعة</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
-<input type="hidden" name="id">
-<label>صورة الموديل
-<input id="item-photo" type="file" accept="image/jpeg,image/png,image/webp">
-<span class="muted">يمكنك إضافة صورة بدل كتابة الاسم. تُضغط الصورة تلقائياً.</span>
-</label>
+<dialog id="item-dialog"><form id="item-form">
+<div class="dialog-head"><h2 id="item-title">إضافة قطعة</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div><input type="hidden" name="id">
+<label>صورة الموديل<input id="item-photo" type="file" accept="image/jpeg,image/png,image/webp"><span class="muted">يمكنك إضافة صورة بدل كتابة الاسم. تُضغط الصورة تلقائياً.</span></label>
 <div class="photo-preview" id="photo-preview" hidden><img alt="معاينة صورة الموديل"><button type="button" class="secondary" id="remove-photo">إزالة الصورة</button></div>
 <label>اسم الموديل — اختياري عند وجود صورة<input name="model" maxlength="100" placeholder="مثلاً: طقم قطن صيفي"></label>
-<div class="grid">
-<label>اللون<input name="color" required maxlength="60"></label>
-<label>المقاس<input name="size" required maxlength="40" placeholder="مثلاً: 2–3 سنوات"></label>
-<label>سعر القطعة<input name="price" type="number" min="0" max="1000000000" step="0.01" required></label>
-<label>الكمية المتوفرة<input name="quantity" type="number" min="0" max="1000000" step="1" required></label>
-</div>
-<p class="muted">تعديل الكمية يحدد الرصيد الحالي مباشرةً. كل موديل ولون ومقاس يُسجّل كصنف مستقل.</p>
-<p id="item-error" class="error" role="alert"></p>
+<div class="grid"><label>اللون<input name="color" required maxlength="60"></label><label>المقاس<input name="size" required maxlength="40" placeholder="مثلاً: 2–3 سنوات"></label><label>سعر القطعة<input name="price" type="number" min="0" max="1000000000" step="0.01" required></label><label>الكمية المتوفرة<input name="quantity" type="number" min="0" max="1000000" step="1" required></label></div>
+<p class="muted">تعديل الكمية يحدد الرصيد الحالي مباشرةً. كل موديل ولون ومقاس يُسجّل كصنف مستقل.</p><p id="item-error" class="error" role="alert"></p>
 <div class="form-actions"><button type="submit" class="primary">حفظ القطعة</button><button type="button" class="secondary" data-close>إلغاء</button></div>
-</form>
-</dialog>
-
-<dialog id="sale-dialog">
-<form id="sale-form">
+</form></dialog>
+<dialog id="sale-dialog"><form id="sale-form">
 <div class="dialog-head"><h2>تسجيل بيع</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
-<label>القطعة<select name="itemId" id="sale-item" required></select></label>
-<img class="detail-photo" id="sale-photo" alt="صورة القطعة المختارة" hidden>
-<div class="grid">
-<label>الكمية<input name="quantity" type="number" min="1" step="1" value="1" required></label>
-<label>رسوم التوصيل<input name="deliveryFee" type="number" min="0" max="1000000000" step="0.01" value="0" required></label>
-</div>
+<label>القطعة<select name="itemId" id="sale-item" required></select></label><img class="detail-photo" id="sale-photo" alt="صورة القطعة المختارة" hidden>
+<div class="grid"><label>الكمية<input name="quantity" type="number" min="1" step="1" value="1" required></label><label>رسوم التوصيل<input name="deliveryFee" type="number" min="0" max="1000000000" step="0.01" value="0" required></label></div>
 <div class="total"><span>الإجمالي مع التوصيل</span><strong id="sale-total">0</strong></div>
-<div class="grid">
-<label>اسم العميل<input name="customer" required maxlength="100"></label>
-<label>رقم الهاتف — اختياري<input name="phone" type="tel" maxlength="40" dir="ltr"></label>
-</div>
+<div class="grid"><label>اسم العميل<input name="customer" required maxlength="100"></label><label>رقم الهاتف — اختياري<input name="phone" type="tel" maxlength="40" dir="ltr"></label></div>
 <label>عنوان التوصيل — اختياري<textarea name="address" rows="2" maxlength="500"></textarea></label>
-<div class="grid">
-<label>حالة الطلب<select name="status"><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option></select></label>
-<label>حالة الدفع<select name="payment"><option>غير مدفوع</option><option>مدفوع</option></select></label>
-</div>
-<label>ملاحظات — اختياري<textarea name="notes" rows="2" maxlength="500"></textarea></label>
-<p id="sale-error" class="error" role="alert"></p>
+<div class="grid"><label>حالة الطلب<select name="status"><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option></select></label><label>حالة الدفع<select name="payment"><option>غير مدفوع</option><option>مدفوع</option></select></label></div>
+<label>ملاحظات — اختياري<textarea name="notes" rows="2" maxlength="500"></textarea></label><p id="sale-error" class="error" role="alert"></p>
 <div class="form-actions"><button type="submit" class="primary">تأكيد البيع وخصم المخزون</button><button type="button" class="secondary" data-close>إلغاء</button></div>
-</form>
-</dialog>
-
-<dialog id="order-dialog">
-<form id="order-form">
+</form></dialog>
+<dialog id="order-dialog"><form id="order-form">
 <div class="dialog-head"><h2>تفاصيل الطلب</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
-<img id="order-photo" class="detail-photo" alt="صورة الموديل في الطلب" hidden>
-<div id="order-details" class="details"></div>
-<input type="hidden" name="id">
-<div class="grid">
-<label>حالة الطلب<select name="status"><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option></select></label>
-<label>حالة الدفع<select name="payment"><option>غير مدفوع</option><option>مدفوع</option></select></label>
-</div>
-<p id="order-error" class="error" role="alert"></p>
+<img id="order-photo" class="detail-photo" alt="صورة الموديل في الطلب" hidden><div id="order-details" class="details"></div><input type="hidden" name="id">
+<div class="grid"><label>حالة الطلب<select name="status"><option>جديد</option><option>قيد التوصيل</option><option>تم التوصيل</option></select></label><label>حالة الدفع<select name="payment"><option>غير مدفوع</option><option>مدفوع</option></select></label></div><p id="order-error" class="error" role="alert"></p>
 <div class="form-actions"><button type="submit" class="primary">حفظ التحديث</button><button type="button" class="danger" id="cancel-order">إلغاء الطلب وإرجاع الكمية</button></div>
-</form>
-</dialog>
-
+</form></dialog>
 <div id="message" role="status" hidden></div>
-
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -230,8 +80,7 @@ const fmt=v=>new Intl.NumberFormat('ar',{maximumFractionDigits:2}).format(v);
 const round=v=>Math.round((v+Number.EPSILON)*100)/100;
 const itemKey=i=>[i.photo||i.model.trim().toLowerCase(),i.color.trim().toLowerCase(),i.size.trim().toLowerCase()].join('\u0000');
 const blank=()=>({version:1,items:[],orders:[]});
-let state=blank(),storageBroken=false,view='inventory',photo='',photoToken=0,messageTimer;
-
+let state=blank(),view='inventory',photo='',photoToken=0,messageTimer;
 function newId(){
  if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
  if(globalThis.crypto?.getRandomValues)return Array.from(crypto.getRandomValues(new Uint8Array(16)),v=>v.toString(16).padStart(2,'0')).join('');
@@ -254,23 +103,16 @@ function validate(d){
  }
  return d;
 }
-try{const raw=localStorage.getItem(STORE);if(raw)state=validate(JSON.parse(raw));}catch{storageBroken=true;}
 function say(text){
  $('#message').textContent=text;$('#message').hidden=false;
  clearTimeout(messageTimer);messageTimer=setTimeout(()=>$('#message').hidden=true,7000);
 }
-function save(next){
- if(storageBroken)throw Error('تعذّرت قراءة التخزين. افتحي الأداة في متصفح عادي يسمح بحفظ البيانات، أو استعيدي نسخة احتياطية سليمة.');
- validate(next);
- try{localStorage.setItem(STORE,JSON.stringify(next));}catch{throw Error('تعذّر الحفظ. قد تكون مساحة المتصفح ممتلئة أو التخزين محظوراً. صدّري نسخة احتياطية.');}
- state=next;render();
-}
-function update(change){const next=JSON.parse(JSON.stringify(state));change(next);save(next);}
+async function save(next){return Cloud.save(next);}
+async function update(change){const next=JSON.parse(JSON.stringify(state));change(next);await save(next);}
 function imageMarkup(p,label){return p?`<img src="${esc(p)}" alt="${esc(label)}" loading="lazy">`:'<span class="placeholder">♧</span>';}
 function showPhoto(selector,p){$(selector).hidden=!p;if(p)$(selector).src=p;else $(selector).removeAttribute('src');}
 function setView(next){
- view=next;
- $('#inventory-view').hidden=next!=='inventory';$('#orders-view').hidden=next!=='orders';
+ view=next;$('#inventory-view').hidden=next!=='inventory';$('#orders-view').hidden=next!=='orders';
  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));
  $('#page-title').textContent=next==='inventory'?'المخزون':'المبيعات والتوصيل';
  $('#main-add').textContent=next==='inventory'?'＋ إضافة قطعة':'＋ تسجيل بيع';
@@ -287,128 +129,83 @@ function render(){
  $('#sales-total').textContent=fmt(active.reduce((s,o)=>s+round(o.quantity*o.price),0));
  $('#pending-count').textContent=fmt(active.filter(o=>o.status!=='تم التوصيل').length);
  $('#low-count').textContent=fmt(state.items.filter(i=>i.quantity===1).length);
- options('#color-filter','color','كل الألوان');options('#size-filter','size','كل المقاسات');
- renderInventory();renderOrders();
+ options('#color-filter','color','كل الألوان');options('#size-filter','size','كل المقاسات');renderInventory();renderOrders();
 }
 function renderInventory(){
  const q=$('#search').value.trim().toLowerCase(),stock=$('#stock-filter').value;
- const items=state.items.filter(i=>[i.model,i.color,i.size].join(' ').toLowerCase().includes(q)
-  &&(!$('#color-filter').value||i.color===$('#color-filter').value)
-  &&(!$('#size-filter').value||i.size===$('#size-filter').value)
-  &&(!stock||(stock==='available'&&i.quantity>0)||(stock==='low'&&i.quantity===1)||(stock==='out'&&i.quantity===0)))
- .sort((a,b)=>a.model.localeCompare(b.model,'ar',{numeric:true})||a.color.localeCompare(b.color,'ar')||a.size.localeCompare(b.size,'ar',{numeric:true}));
- $('#inventory-body').innerHTML=items.map(i=>`<tr>
- <td><div class="model">${imageMarkup(i.photo,i.model)}<strong>${esc(i.model)}</strong></div></td>
- <td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${fmt(i.price)}</td><td>${fmt(i.quantity)}</td>
- <td><span class="status ${i.quantity===0?'out':i.quantity===1?'low':''}">${i.quantity===0?'نفد المخزون':i.quantity===1?'قطعة واحدة متبقية':'متوفر'}</span></td>
- <td><div class="actions"><button type="button" data-sell="${esc(i.id)}" ${i.quantity===0?'disabled':''}>بيع</button><button type="button" data-edit="${esc(i.id)}">تعديل</button></div></td></tr>`).join('');
- $('#inventory-empty').hidden=items.length>0;
- $('#inventory-summary').textContent=`عرض ${fmt(items.length)} من ${fmt(state.items.length)} أصناف. تُخصم الكمية تلقائياً عند تسجيل البيع.`;
+ const items=state.items.filter(i=>[i.model,i.color,i.size].join(' ').toLowerCase().includes(q)&&(!$('#color-filter').value||i.color===$('#color-filter').value)&&(!$('#size-filter').value||i.size===$('#size-filter').value)&&(!stock||(stock==='available'&&i.quantity>0)||(stock==='low'&&i.quantity===1)||(stock==='out'&&i.quantity===0))).sort((a,b)=>a.model.localeCompare(b.model,'ar',{numeric:true})||a.color.localeCompare(b.color,'ar')||a.size.localeCompare(b.size,'ar',{numeric:true}));
+ $('#inventory-body').innerHTML=items.map(i=>`<tr><td><div class="model">${imageMarkup(i.photo,i.model)}<strong>${esc(i.model)}</strong></div></td><td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${fmt(i.price)}</td><td>${fmt(i.quantity)}</td><td><span class="status ${i.quantity===0?'out':i.quantity===1?'low':''}">${i.quantity===0?'نفد المخزون':i.quantity===1?'قطعة واحدة متبقية':'متوفر'}</span></td><td><div class="actions"><button type="button" data-sell="${esc(i.id)}" ${i.quantity===0?'disabled':''}>بيع</button><button type="button" data-edit="${esc(i.id)}">تعديل</button></div></td></tr>`).join('');
+ $('#inventory-empty').hidden=items.length>0;$('#inventory-summary').textContent=`عرض ${fmt(items.length)} من ${fmt(state.items.length)} أصناف. تُخصم الكمية تلقائياً عند تسجيل البيع.`;
 }
 function renderOrders(){
  const q=$('#order-search').value.trim().toLowerCase(),status=$('#status-filter').value;
  const orders=state.orders.filter(o=>[o.customer,o.phone,o.model,o.number,'KK-'+o.number].join(' ').toLowerCase().includes(q)&&(!status||o.status===status)).sort((a,b)=>b.number-a.number);
- $('#orders-body').innerHTML=orders.map(o=>`<tr>
- <td><strong dir="ltr">KK-${o.number}</strong><small>${new Date(o.date).toLocaleDateString('ar')}</small></td>
- <td><strong>${esc(o.customer)}</strong><small dir="ltr">${esc(o.phone)}</small></td>
- <td><div class="model">${imageMarkup(o.photo,o.model)}<span>${esc(o.model)}<small>${esc(o.color)} · ${esc(o.size)} · ${fmt(o.quantity)} قطعة</small></span></div></td>
- <td>${fmt(round(o.quantity*o.price+o.deliveryFee))}<small>التوصيل: ${fmt(o.deliveryFee)}</small></td>
- <td><span class="status ${o.status==='ملغي'?'out':o.status==='تم التوصيل'?'':'low'}">${o.status}</span><small>${o.payment}${o.status==='ملغي'&&o.payment==='مدفوع'?' · تابعي رد المبلغ':''}</small></td>
- <td><div class="actions"><button type="button" data-order="${esc(o.id)}">التفاصيل</button></div></td></tr>`).join('');
+ $('#orders-body').innerHTML=orders.map(o=>`<tr><td><strong dir="ltr">KK-${o.number}</strong><small>${new Date(o.date).toLocaleDateString('ar')}</small></td><td><strong>${esc(o.customer)}</strong><small dir="ltr">${esc(o.phone)}</small></td><td><div class="model">${imageMarkup(o.photo,o.model)}<span>${esc(o.model)}<small>${esc(o.color)} · ${esc(o.size)} · ${fmt(o.quantity)} قطعة</small></span></div></td><td>${fmt(round(o.quantity*o.price+o.deliveryFee))}<small>التوصيل: ${fmt(o.deliveryFee)}</small></td><td><span class="status ${o.status==='ملغي'?'out':o.status==='تم التوصيل'?'':'low'}">${o.status}</span><small>${o.payment}${o.status==='ملغي'&&o.payment==='مدفوع'?' · تابعي رد المبلغ':''}</small></td><td><div class="actions"><button type="button" data-order="${esc(o.id)}">التفاصيل</button></div></td></tr>`).join('');
  $('#orders-empty').hidden=orders.length>0;
 }
-function photoPreview(){
- $('#photo-preview').hidden=!photo;
- showPhoto('#photo-preview img',photo);
-}
+function photoPreview(){$('#photo-preview').hidden=!photo;showPhoto('#photo-preview img',photo);}
 function openItem(id){
- photoToken++;
- const form=$('#item-form'),item=state.items.find(i=>i.id===id);
- form.reset();form.elements.id.value=id||'';
- photo=item?.photo||'';photoPreview();
- form.querySelector('[type=submit]').disabled=false;
- $('#item-error').textContent='';$('#item-title').textContent=item?'تعديل القطعة':'إضافة قطعة';
+ photoToken++;const form=$('#item-form'),item=state.items.find(i=>i.id===id);form.reset();form.elements.id.value=id||'';photo=item?.photo||'';photoPreview();form.querySelector('[type=submit]').disabled=false;$('#item-error').textContent='';$('#item-title').textContent=item?'تعديل القطعة':'إضافة قطعة';
  if(item)for(const field of ['model','color','size','price','quantity'])form.elements[field].value=item[field];
  $('#item-dialog').showModal();
 }
-$('#item-form').addEventListener('submit',e=>{
+$('#item-form').addEventListener('submit',async e=>{
  e.preventDefault();const f=e.target;
  try{
   if(!f.elements.model.value.trim()&&!photo)throw Error('أضيفي صورة للموديل أو اكتبي اسمه.');
   const id=f.elements.id.value||newId();
   const item={id,model:f.elements.model.value.trim()||'موديل مصوّر '+id.slice(-6),photo,color:f.elements.color.value.trim(),size:f.elements.size.value.trim(),price:round(Number(f.elements.price.value)),quantity:Number(f.elements.quantity.value)};
   if(state.items.some(i=>i.id!==id&&itemKey(i)===itemKey(item)))throw Error('هذا الموديل واللون والمقاس مسجّل بالفعل. عدّلي كميته من المخزون.');
-  update(next=>{const index=next.items.findIndex(i=>i.id===id);if(index<0)next.items.push(item);else next.items[index]=item;});
-  $('#item-dialog').close();say('تم حفظ القطعة بنجاح');
+  await update(next=>{const index=next.items.findIndex(i=>i.id===id);if(index<0)next.items.push(item);else next.items[index]=item;});
+  $('#item-dialog').close();say('تم حفظ القطعة سحابياً');
  }catch(error){$('#item-error').textContent=error.message;}
 });
 function decodeImage(file){
  return new Promise((resolve,reject)=>{
   const url=URL.createObjectURL(file),img=new Image();
   const timer=setTimeout(()=>{img.onload=img.onerror=null;URL.revokeObjectURL(url);reject(Error('استغرقت قراءة الصورة وقتاً طويلاً. جرّبي صورة أصغر.'));},15000);
-  img.onload=()=>{clearTimeout(timer);URL.revokeObjectURL(url);resolve(img);};
-  img.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(url);reject(Error('تعذّرت قراءة الصورة. اختاري صورة أخرى.'));};
-  img.src=url;
+  img.onload=()=>{clearTimeout(timer);URL.revokeObjectURL(url);resolve(img);};img.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(url);reject(Error('تعذّرت قراءة الصورة. اختاري صورة أخرى.'));};img.src=url;
  });
 }
 $('#item-photo').addEventListener('change',async e=>{
- const file=e.target.files[0],token=++photoToken;if(!file)return;
- const submit=$('#item-form [type=submit]');submit.disabled=true;$('#item-error').textContent='';
+ const file=e.target.files[0],token=++photoToken;if(!file)return;const submit=$('#item-form [type=submit]');submit.disabled=true;$('#item-error').textContent='';
  try{
-  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('اختاري صورة JPEG أو PNG أو WebP.');
-  if(file.size>10*1024*1024)throw Error('اختاري صورة أصغر من 10 ميغابايت.');
-  const img=await decodeImage(file);
-  const scale=Math.min(1,640/Math.max(img.naturalWidth,img.naturalHeight));
-  const canvas=document.createElement('canvas');
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('اختاري صورة JPEG أو PNG أو WebP.');if(file.size>10*1024*1024)throw Error('اختاري صورة أصغر من 10 ميغابايت.');
+  const img=await decodeImage(file),scale=Math.min(1,640/Math.max(img.naturalWidth,img.naturalHeight)),canvas=document.createElement('canvas');
   canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
   const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  const result=canvas.toDataURL('image/jpeg',.75);
-  if(!validPhoto(result))throw Error('الصورة كبيرة بعد الضغط. اختاري صورة أصغر أو أبسط.');
-  if(token!==photoToken)return;
-  photo=result;photoPreview();
+  const result=canvas.toDataURL('image/jpeg',.75);if(!validPhoto(result))throw Error('الصورة كبيرة بعد الضغط. اختاري صورة أصغر أو أبسط.');
+  if(token!==photoToken)return;photo=result;photoPreview();
  }catch(error){if(token===photoToken)$('#item-error').textContent=error.message;}
  finally{if(token===photoToken){submit.disabled=false;e.target.value='';}}
 });
-$('#remove-photo').onclick=()=>{
- photoToken++;photo='';photoPreview();$('#item-photo').value='';
- $('#item-form [type=submit]').disabled=false;
-};
+$('#remove-photo').onclick=()=>{photoToken++;photo='';photoPreview();$('#item-photo').value='';$('#item-form [type=submit]').disabled=false;};
 function saleTotal(){
- const f=$('#sale-form'),item=state.items.find(i=>i.id===f.elements.itemId.value);
- f.elements.quantity.max=item?.quantity||1;showPhoto('#sale-photo',item?.photo);
- const total=round((item?.price||0)*Number(f.elements.quantity.value)+Number(f.elements.deliveryFee.value));
- $('#sale-total').textContent=Number.isFinite(total)?fmt(total):'—';
+ const f=$('#sale-form'),item=state.items.find(i=>i.id===f.elements.itemId.value);f.elements.quantity.max=item?.quantity||1;showPhoto('#sale-photo',item?.photo);
+ const total=round((item?.price||0)*Number(f.elements.quantity.value)+Number(f.elements.deliveryFee.value));$('#sale-total').textContent=Number.isFinite(total)?fmt(total):'—';
 }
 function openSale(id){
- const available=state.items.filter(i=>i.quantity>0);
- if(!available.length){say('أضيفي قطعاً متوفرة إلى المخزون أولاً.');return;}
- $('#sale-form').reset();$('#sale-error').textContent='';
- $('#sale-item').innerHTML=available.map(i=>`<option value="${esc(i.id)}">${esc(i.model)} · ${esc(i.color)} · ${esc(i.size)} (المتوفر: ${fmt(i.quantity)})</option>`).join('');
+ const available=state.items.filter(i=>i.quantity>0);if(!available.length){say('أضيفي قطعاً متوفرة إلى المخزون أولاً.');return;}
+ $('#sale-form').reset();$('#sale-error').textContent='';$('#sale-item').innerHTML=available.map(i=>`<option value="${esc(i.id)}">${esc(i.model)} · ${esc(i.color)} · ${esc(i.size)} (المتوفر: ${fmt(i.quantity)})</option>`).join('');
  if(id)$('#sale-item').value=id;saleTotal();$('#sale-dialog').showModal();
 }
-$('#sale-form').addEventListener('input',saleTotal);
-$('#sale-form').addEventListener('change',saleTotal);
-$('#sale-form').addEventListener('submit',e=>{
+$('#sale-form').addEventListener('input',saleTotal);$('#sale-form').addEventListener('change',saleTotal);
+$('#sale-form').addEventListener('submit',async e=>{
  e.preventDefault();const v=Object.fromEntries(new FormData(e.target));
  try{
-  update(next=>{
-   const item=next.items.find(i=>i.id===v.itemId),quantity=Number(v.quantity);
-   if(!item||!Number.isSafeInteger(quantity)||quantity<1||quantity>item.quantity)throw Error('الكمية المطلوبة غير متوفرة.');
+  await update(next=>{
+   const item=next.items.find(i=>i.id===v.itemId),quantity=Number(v.quantity);if(!item||!Number.isSafeInteger(quantity)||quantity<1||quantity>item.quantity)throw Error('الكمية المطلوبة غير متوفرة.');
    const number=next.orders.reduce((max,o)=>Math.max(max,o.number),0)+1;
    next.orders.push({id:newId(),number,itemId:item.id,model:item.model,photo:item.photo||'',color:item.color,size:item.size,price:item.price,quantity,deliveryFee:round(Number(v.deliveryFee)),customer:v.customer.trim(),phone:v.phone.trim(),address:v.address.trim(),notes:v.notes.trim(),status:v.status,payment:v.payment,date:new Date().toISOString()});
    item.quantity-=quantity;
   });
-  $('#sale-dialog').close();setView('orders');say('تم تسجيل البيع وخصم الكمية');
+  $('#sale-dialog').close();setView('orders');say('تم تسجيل البيع وخصم الكمية سحابياً');
  }catch(error){$('#sale-error').textContent=error.message;}
 });
 function openOrder(id){
  const o=state.orders.find(o=>o.id===id),f=$('#order-form');if(!o)return;
- f.elements.id.value=id;f.elements.status.value=o.status==='ملغي'?'جديد':o.status;f.elements.payment.value=o.payment;
- f.elements.status.disabled=o.status==='ملغي';f.elements.payment.disabled=o.status==='ملغي';
- f.querySelector('[type=submit]').hidden=o.status==='ملغي';$('#cancel-order').hidden=o.status==='ملغي';$('#order-error').textContent='';
- showPhoto('#order-photo',o.photo);
- $('#order-details').textContent=
- `KK-${o.number} · ${new Date(o.date).toLocaleDateString('ar')}
+ f.elements.id.value=id;f.elements.status.value=o.status==='ملغي'?'جديد':o.status;f.elements.payment.value=o.payment;f.elements.status.disabled=o.status==='ملغي';f.elements.payment.disabled=o.status==='ملغي';f.querySelector('[type=submit]').hidden=o.status==='ملغي';$('#cancel-order').hidden=o.status==='ملغي';$('#order-error').textContent='';showPhoto('#order-photo',o.photo);
+ $('#order-details').textContent=`KK-${o.number} · ${new Date(o.date).toLocaleDateString('ar')}
 العميل: ${o.customer}
 الهاتف: ${o.phone||'غير محدد'}
 الموديل: ${o.model}
@@ -421,81 +218,281 @@ function openOrder(id){
 الملاحظات: ${o.notes||'لا توجد'}${o.status==='ملغي'&&o.payment==='مدفوع'?'\nهذا الطلب مدفوع. تابعي رد المبلغ للعميل خارج الأداة.':''}`;
  $('#order-dialog').showModal();
 }
-$('#order-form').addEventListener('submit',e=>{
+$('#order-form').addEventListener('submit',async e=>{
  e.preventDefault();const f=e.target;
  try{
-  update(next=>{
-   const o=next.orders.find(o=>o.id===f.elements.id.value);
-   if(!o||o.status==='ملغي')throw Error('لا يمكن تعديل طلب ملغي.');
-   o.status=f.elements.status.value;o.payment=f.elements.payment.value;
-  });
-  $('#order-dialog').close();say('تم تحديث حالة الطلب');
+  await update(next=>{const o=next.orders.find(o=>o.id===f.elements.id.value);if(!o||o.status==='ملغي')throw Error('لا يمكن تعديل طلب ملغي.');o.status=f.elements.status.value;o.payment=f.elements.payment.value;});
+  $('#order-dialog').close();say('تم تحديث حالة الطلب سحابياً');
  }catch(error){$('#order-error').textContent=error.message;}
 });
-$('#cancel-order').onclick=()=>{
+$('#cancel-order').onclick=async()=>{
  if(!confirm('إلغاء الطلب وإرجاع الكمية للمخزون؟ إذا كان مدفوعاً، تابعي رد المبلغ للعميل.'))return;
  try{
-  update(next=>{
-   const o=next.orders.find(o=>o.id===$('#order-form').elements.id.value);
-   if(!o||o.status==='ملغي')throw Error('هذا الطلب ملغي بالفعل.');
-   const item=next.items.find(i=>i.id===o.itemId);if(!item)throw Error('لم يتم العثور على الصنف.');
-   item.quantity+=o.quantity;o.status='ملغي';
-  });
-  $('#order-dialog').close();say('تم إلغاء الطلب وإرجاع الكمية للمخزون');
+  await update(next=>{const o=next.orders.find(o=>o.id===$('#order-form').elements.id.value);if(!o||o.status==='ملغي')throw Error('هذا الطلب ملغي بالفعل.');const item=next.items.find(i=>i.id===o.itemId);if(!item)throw Error('لم يتم العثور على الصنف.');item.quantity+=o.quantity;o.status='ملغي';});
+  $('#order-dialog').close();say('تم إلغاء الطلب وإرجاع الكمية للمخزون سحابياً');
  }catch(error){$('#order-error').textContent=error.message;}
 };
 document.addEventListener('click',e=>{
- const b=e.target.closest('button');if(!b)return;
- if(b.hasAttribute('data-close'))b.closest('dialog').close();
- if(b.dataset.view)setView(b.dataset.view);
- if(b.dataset.edit)openItem(b.dataset.edit);
- if(b.dataset.sell)openSale(b.dataset.sell);
- if(b.dataset.order)openOrder(b.dataset.order);
+ const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-close'))b.closest('dialog').close();if(b.dataset.view)setView(b.dataset.view);if(b.dataset.edit)openItem(b.dataset.edit);if(b.dataset.sell)openSale(b.dataset.sell);if(b.dataset.order)openOrder(b.dataset.order);
 });
-$('#main-add').onclick=()=>view==='inventory'?openItem():openSale();
-$('#new-sale').onclick=()=>openSale();$('#order-sale').onclick=()=>openSale();
+$('#main-add').onclick=()=>view==='inventory'?openItem():openSale();$('#new-sale').onclick=()=>openSale();$('#order-sale').onclick=()=>openSale();
 for(const id of ['search','color-filter','size-filter','stock-filter'])$('#'+id).addEventListener('input',renderInventory);
 for(const id of ['order-search','status-filter'])$('#'+id).addEventListener('input',renderOrders);
 for(const type of ['item','sale','order']){
  $('#'+type+'-form').addEventListener('invalid',e=>{
-  const field=e.target,label=field.closest('label')?.firstChild.textContent.trim()||'الحقل';
-  let text=`راجعي قيمة «${label}».`;
-  if(field.validity.valueMissing)text=`يرجى تعبئة «${label}» قبل الحفظ.`;
-  else if(field.validity.rangeUnderflow)text=`قيمة «${label}» يجب ألا تقل عن ${field.min}.`;
-  else if(field.validity.rangeOverflow)text=`قيمة «${label}» يجب ألا تتجاوز ${field.max}.`;
-  else if(field.validity.stepMismatch)text=field.step==='1'?`أدخلي عدداً صحيحاً في «${label}».`:`أدخلي السعر بمنزلتين عشريتين كحد أقصى في «${label}».`;
-  $('#'+type+'-error').textContent=text;
+  const field=e.target,label=field.closest('label')?.firstChild.textContent.trim()||'الحقل';let text=`راجعي قيمة «${label}».`;
+  if(field.validity.valueMissing)text=`يرجى تعبئة «${label}» قبل الحفظ.`;else if(field.validity.rangeUnderflow)text=`قيمة «${label}» يجب ألا تقل عن ${field.min}.`;else if(field.validity.rangeOverflow)text=`قيمة «${label}» يجب ألا تتجاوز ${field.max}.`;else if(field.validity.stepMismatch)text=field.step==='1'?`أدخلي عدداً صحيحاً في «${label}».`:`أدخلي السعر بمنزلتين عشريتين كحد أقصى في «${label}».`;$('#'+type+'-error').textContent=text;
  },true);
 }
 $('#export').onclick=()=>{
- if(storageBroken){say('تعذّرت قراءة البيانات السابقة. لن يتم تصدير بيانات فارغة بدلاً منها.');return;}
- const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download='kenz-kids-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),1000);say('تم تصدير النسخة. احتفظي بها في مكان آمن؛ تتضمن بيانات العملاء والصور.');
+ if(!Cloud.ready||Cloud.uncertain||Cloud.writing||Cloud.loading){say('حدّث البيانات من «مزامنة الآن» وانتظر اكتمال الحفظ قبل تصدير النسخة.');return;}
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kenz-kids-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say('تم تصدير النسخة. احتفظي بها في مكان آمن؛ تتضمن بيانات العملاء والصور.');
 };
 $('#import').onclick=()=>$('#import-file').click();
 $('#import-file').addEventListener('change',async e=>{
- const file=e.target.files[0];if(!file)return;
+ const file=e.target.files[0];if(!file)return;const epoch=Cloud.epoch,storeId=Cloud.storeId;
  try{
+  if(!Cloud.ready||Cloud.uncertain||Cloud.writing||Cloud.loading)throw Error('حدّث البيانات وانتظر اكتمال المزامنة قبل الاستعادة.');
   if(file.size>10*1024*1024)throw Error('الملف أكبر من 10 ميغابايت.');
   const next=validate(JSON.parse(await file.text()));
-  if(!confirm(`استعادة ${next.items.length} أصناف و${next.orders.length} طلبات؟ ستُستبدل البيانات الحالية بالكامل. صدّري نسخة منها أولاً إن كنت تحتاجينها.`))return;
-  const wasBroken=storageBroken;storageBroken=false;
-  try{save(next);}catch(error){storageBroken=wasBroken;throw error;}
-  say('تمت استعادة النسخة الاحتياطية');
+  if(epoch!==Cloud.epoch||storeId!==Cloud.storeId)throw Error('تغيّر الحساب أو المتجر أثناء قراءة الملف. أعد اختيار الملف.');
+  if(!confirm(`استعادة ${next.items.length} أصناف و${next.orders.length} طلبات في متجر الحساب ${Cloud.session.user.email}؟ ستُستبدل البيانات الحالية بالكامل. صدّري نسخة منها أولاً إن كنت تحتاجينها.`))return;
+  if(epoch!==Cloud.epoch||storeId!==Cloud.storeId)throw Error('تغيّر الحساب أو المتجر. أعد اختيار الملف.');
+  await save(next);say('تمت استعادة النسخة الاحتياطية سحابياً');
  }catch(error){say('لم يتم الاستيراد: '+(error instanceof SyntaxError?'الملف ليس نسخة JSON صالحة.':error.message));}
  finally{e.target.value='';}
 });
-window.addEventListener('storage',e=>{
- if(e.key!==STORE&&e.key!==null)return;
- try{
-  state=e.newValue?validate(JSON.parse(e.newValue)):blank();storageBroken=false;photoToken++;
-  document.querySelectorAll('dialog[open]').forEach(d=>d.close());render();say('تم تحديث البيانات من نافذة أخرى. راجعيها قبل المتابعة.');
- }catch{storageBroken=true;say('توجد بيانات غير صالحة في التخزين. استعيدي نسخة سليمة للمتابعة.');}
-});
 $('#today').textContent=new Date().toLocaleDateString('ar',{year:'numeric',month:'short',day:'numeric'});
-render();
-if(storageBroken)say('تعذّرت قراءة البيانات المحفوظة. افتحي الملف في Chrome مع السماح بالتخزين. لم يتم تغيير بياناتك السابقة.');
+
+const Cloud={
+ url:'https://dslzlmxnjqznkmyxxozt.supabase.co',key:'sb_publishable_nkhELf6-aQOg05FDsjFeEw_8Jrxi2kf',authKey:'kenz-kids-auth-v1',
+ session:null,role:null,storeId:null,revision:-1,epoch:0,sequence:0,ready:false,uncertain:false,writing:false,loading:false,polling:false,refreshPromise:null,
+ checkConfig(){
+  this.url=this.url.replace(/\/+$/,'');
+  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(this.url)||/YOUR_|PLACEHOLDER/i.test(this.url+this.key)||!this.key||this.key.startsWith('sb_secret_'))throw Error('الاتصال السحابي لم يُضبط بعد. استخدم رابط المشروع والمفتاح العام Publishable فقط.');
+  if(this.key.split('.').length===3){try{const middle=this.key.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');if(JSON.parse(atob(middle)).role!=='anon')throw Error('elevated');}catch{throw Error('استخدم مفتاح Publishable أو anon العام، وليس مفتاح الإدارة.');}}
+ },
+ normalizeSession(value){
+  if(!value||typeof value.access_token!=='string'||typeof value.refresh_token!=='string'||typeof value.user?.id!=='string')throw Error('جلسة الدخول غير صالحة.');
+  return {access_token:value.access_token,refresh_token:value.refresh_token,expires_at:Number(value.expires_at)||Math.floor(Date.now()/1000)+(Number(value.expires_in)||3600),user:{id:value.user.id,email:value.user.email||''}};
+ },
+ remember(value){this.session=this.normalizeSession(value);try{localStorage.setItem(this.authKey,JSON.stringify(this.session));}catch{}},
+ closeEditors(){photoToken++;document.querySelectorAll('dialog[open]').forEach(d=>d.close());for(const id of ['item-form','sale-form','order-form']){const form=$('#'+id);if(form)form.reset();}for(const id of ['order-details','cloud-member-list']){const node=$('#'+id);if(node)node.textContent='';}photo='';photoPreview();showPhoto('#sale-photo',null);showPhoto('#order-photo',null);},
+ status(text){$('#cloud-status').textContent=text;},
+ setWriteBusy(value){
+  for(const id of ['item','sale','order']){const b=$(`#${id}-form [type=submit]`);if(b)b.disabled=value;}
+  for(const id of ['cloud-migrate','cloud-sync','cloud-logout']){const b=$('#'+id);if(b)b.disabled=value;}
+ },
+ begin(value,persist=true){
+  const normalized=this.normalizeSession(value);this.epoch++;this.sequence++;this.session=normalized;if(persist)this.remember(normalized);
+  this.revision=-1;this.role=null;this.storeId=null;this.ready=false;this.uncertain=false;this.writing=false;this.loading=false;this.polling=false;this.refreshPromise=null;
+  state=blank();this.closeEditors();this.setWriteBusy(false);this.updateAccessUI();
+  $('main').hidden=true;$('#cloud-auth').hidden=false;$('#cloud-auth-retry').hidden=false;$('#cloud-auth-error').textContent='';render();
+ },
+ signOutLocal(message='',persist=true){
+  this.epoch++;this.sequence++;this.session=null;this.revision=-1;this.role=null;this.storeId=null;this.ready=false;this.uncertain=false;this.writing=false;this.loading=false;this.polling=false;this.refreshPromise=null;state=blank();
+  if(persist){try{localStorage.removeItem(this.authKey);}catch{}}
+  this.closeEditors();this.setWriteBusy(false);this.updateAccessUI();$('main').hidden=true;$('#cloud-auth').hidden=false;$('#cloud-auth-retry').hidden=true;$('#cloud-auth-error').textContent=message;$('#cloud-login').elements.password.value='';render();
+ },
+ accessDenied(message='حسابك مسجّل الدخول، لكن لم تُمنح صلاحية الوصول إلى المتجر. اطلب من المالك إضافة بريدك.'){
+  const session=this.session;if(session)this.begin(session,false);else this.signOutLocal();
+  $('#cloud-auth-error').textContent=message;$('#cloud-auth-retry').hidden=!session;
+ },
+ updateAccessUI(){
+  const owner=this.ready&&this.role==='owner';const button=$('#cloud-members');if(button)button.hidden=!owner;
+  const label=$('#cloud-user');if(label)label.textContent=this.session?`${this.session.user.email} · ${this.role==='owner'?'مالك المتجر':this.role==='staff'?'موظف':'بانتظار الصلاحية'}`:'';
+  if(!owner){const dialog=$('#cloud-members-dialog');if(dialog?.open)dialog.close();const list=$('#cloud-member-list');if(list)list.textContent='';const form=$('#cloud-add-staff');if(form)form.reset();}
+ },
+ async request(method,path,body,token){
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),30000);
+  try{
+   const headers={apikey:this.key,'Content-Type':'application/json'};if(token)headers.Authorization=`Bearer ${token}`;
+   const response=await fetch(this.url+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal,cache:'no-store'});
+   const text=await response.text();let result=null;if(text){try{result=JSON.parse(text);}catch{}}
+   if(!response.ok){
+    const backendMessage=typeof result?.message==='string'&&/[\u0600-\u06ff]/.test(result.message)?result.message.slice(0,500):'';
+    const error=Error(backendMessage||(response.status===403?'حسابك غير مخوّل للوصول إلى هذا المتجر.':response.status===404?'لم يتم العثور على الحساب أو البيانات المطلوبة.':response.status===409?'تعارضت العملية مع بيانات موجودة.':response.status===429?'طلبات كثيرة. انتظر قليلاً ثم حاول مجدداً.':'تعذّر إكمال الطلب السحابي.'));
+    error.status=response.status;error.code=result?.code;throw error;
+   }
+   return result;
+  }catch(error){if(error.status)throw error;throw Error(error.name==='AbortError'?'انتهت مهلة الاتصال. تحقّق من الإنترنت ثم أعد التحديث.':'تعذّر الاتصال بقاعدة البيانات. تحقّق من الإنترنت.');}
+  finally{clearTimeout(timer);}
+ },
+ async token(force=false){
+  if(!this.session)throw Error('سجّل الدخول أولاً.');
+  if(!force&&this.session.expires_at>Math.floor(Date.now()/1000)+60)return this.session.access_token;
+  if(this.refreshPromise)return this.refreshPromise;
+  const epoch=this.epoch,owner=this.session.user.id,refresh=this.session.refresh_token;let pending;
+  pending=(async()=>{
+   const result=await this.request('POST','/auth/v1/token?grant_type=refresh_token',{refresh_token:refresh});
+   if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');
+   const normalized=this.normalizeSession(result);if(normalized.user.id!==owner)throw Error('تغيّر الحساب.');
+   this.remember(normalized);return normalized.access_token;
+  })().catch(error=>{if(epoch===this.epoch&&[400,401].includes(error.status))this.signOutLocal('انتهت جلسة الدخول. سجّل الدخول مجدداً.');throw error;}).finally(()=>{if(this.refreshPromise===pending)this.refreshPromise=null;});
+  this.refreshPromise=pending;return pending;
+ },
+ async api(method,path,body){
+  const epoch=this.epoch;let token=await this.token(),result;
+  if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');
+  try{result=await this.request(method,path,body,token);}
+  catch(error){if(error.status!==401||epoch!==this.epoch)throw error;token=await this.token(true);if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');result=await this.request(method,path,body,token);}
+  if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');return result;
+ },
+ unpack(result){
+  if(!result||!Number.isSafeInteger(result.revision)||result.revision<0||!['owner','staff'].includes(result.role)||typeof result.store_id!=='string'||!result.store_id)throw Error('استجابة المزامنة أو صلاحيات المتجر غير صالحة.');
+  return {revision:result.revision,payload:validate(result.payload),storeId:result.store_id,role:result.role};
+ },
+ async load({closeEditors=false,duringWrite=false}={}){
+  if(!this.session)throw Error('سجّل الدخول أولاً.');if(this.writing&&!duringWrite)throw Error('انتظر اكتمال الحفظ أولاً.');
+  const epoch=this.epoch,sequence=++this.sequence;this.loading=true;this.status('جارٍ تحميل البيانات المشتركة…');
+  try{
+   const result=this.unpack(await this.api('POST','/rest/v1/rpc/kenz_get_state',{}));
+   if(epoch!==this.epoch||sequence!==this.sequence)return false;
+   if(document.querySelector('dialog[open]')){if(!closeEditors){this.status('المزامنة مؤجلة أثناء تعديل البيانات.');return false;}this.closeEditors();}
+   state=result.payload;this.revision=result.revision;this.storeId=result.storeId;this.role=result.role;this.ready=true;this.uncertain=false;
+   render();this.updateMigrationButton();this.updateAccessUI();$('main').hidden=false;$('#cloud-auth').hidden=true;
+   this.status('تمت المزامنة السحابية · '+new Date().toLocaleTimeString('ar'));return true;
+  }catch(error){
+   if(epoch===this.epoch&&error.status===403)this.accessDenied(error.message);
+   throw error;
+  }finally{if(epoch===this.epoch&&sequence===this.sequence)this.loading=false;}
+ },
+ async save(next){
+  if(!this.ready||this.uncertain)throw Error('حدّث البيانات من زر «مزامنة الآن» قبل الحفظ.');
+  if(this.writing||this.loading)throw Error('انتظر اكتمال المزامنة الحالية أولاً.');
+  validate(next);if(new Blob([JSON.stringify(next)]).size>10*1024*1024)throw Error('البيانات والصور تجاوزت حد هذه النسخة (10 ميغابايت).');
+  const epoch=this.epoch,expected=this.revision,expectedStore=this.storeId;
+  this.writing=true;this.sequence++;this.setWriteBusy(true);this.status('جارٍ الحفظ في الحساب…');
+  try{
+   const result=this.unpack(await this.api('POST','/rest/v1/rpc/kenz_save_state',{expected_store_id:expectedStore,expected_revision:expected,new_payload:next}));
+   if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');
+   if(result.storeId!==expectedStore){const error=Error('تغيّر المتجر المرتبط بالحساب.');error.status=409;throw error;}
+   state=result.payload;this.revision=result.revision;this.storeId=result.storeId;this.role=result.role;this.uncertain=false;
+   render();this.updateMigrationButton();this.updateAccessUI();this.status('تم الحفظ سحابياً · '+new Date().toLocaleTimeString('ar'));
+  }catch(error){
+   if(epoch!==this.epoch)throw error;
+   if(error.status===403){const message=error.message;this.accessDenied(message);say(message);throw Error(message);}
+   if(error.status===409){
+    this.uncertain=true;this.closeEditors();
+    try{await this.load({closeEditors:true,duringWrite:true});}catch{this.status('تعذّر تحميل آخر تعديل. اضغط «مزامنة الآن».');}
+    const message='تغيّرت البيانات أو المتجر من جهاز آخر؛ لم يُعتمد تعديلك. راجع آخر مخزون وأعد العملية.';say(message);throw Error(message);
+   }
+   this.uncertain=true;this.status('لم يتم تأكيد نتيجة الحفظ. اضغط «مزامنة الآن» قبل المتابعة.');
+   throw Error('لم يتم تأكيد نتيجة الحفظ. حدّث البيانات قبل إعادة العملية لتفادي تكرارها.');
+  }finally{if(epoch===this.epoch){this.writing=false;this.loading=false;this.setWriteBusy(false);}}
+ },
+ localSnapshot(){try{const raw=localStorage.getItem(STORE);if(!raw)return null;const data=validate(JSON.parse(raw));return data.items.length||data.orders.length?data:null;}catch{return null;}},
+ updateMigrationButton(){$('#cloud-migrate').hidden=!this.localSnapshot();},
+ async poll(){
+  if(!this.session||!this.ready||this.uncertain||this.writing||this.loading||this.polling||document.hidden)return;
+  const epoch=this.epoch,sequence=this.sequence,revision=this.revision,storeId=this.storeId;this.polling=true;
+  try{
+   const query=new URLSearchParams({select:'store_id,revision'});
+   const rows=await this.api('GET','/rest/v1/kenz_inventory_state?'+query);
+   if(epoch!==this.epoch||sequence!==this.sequence||this.writing)return;
+   if(!Array.isArray(rows)||rows.length>1){this.accessDenied('تعذّر تحديد متجر الحساب. تواصل مع المالك.');return;}
+   if(rows.length===0){await this.load({closeEditors:true});return;}
+   if(!Number.isSafeInteger(rows[0].revision)||typeof rows[0].store_id!=='string')throw Error('تعذّر فحص آخر إصدار.');
+   if(rows[0].store_id!==storeId){this.closeEditors();await this.load({closeEditors:true});say('تغيّر المتجر المرتبط بالحساب. راجع البيانات قبل المتابعة.');return;}
+   if(rows[0].revision!==revision){if(document.querySelector('dialog[open]')){this.status('توجد تعديلات من جهاز آخر. أغلق النموذج لتحديث البيانات، أو أعد المحاولة إذا تعارض الحفظ.');return;}await this.load();}
+  }catch(error){
+   if(epoch===this.epoch&&error.status===403)this.accessDenied(error.message);
+   else if(epoch===this.epoch)this.status('تعذّر آخر تحديث تلقائي؛ المعروض هو آخر نسخة محمّلة.');
+  }finally{if(epoch===this.epoch)this.polling=false;}
+ },
+ async loadMembers(){
+  if(!this.ready||this.role!=='owner')throw Error('إدارة الموظفين متاحة لمالك المتجر فقط.');
+  $('#cloud-member-list').textContent='جارٍ تحميل الموظفين…';
+  const rows=await this.api('POST','/rest/v1/rpc/kenz_list_members',{});
+  if(!Array.isArray(rows)||rows.some(row=>!row||typeof row.user_id!=='string'||typeof row.email!=='string'||!['owner','staff'].includes(row.role)))throw Error('استجابة قائمة الموظفين غير صالحة.');
+  $('#cloud-member-list').innerHTML=rows.map(row=>`
+   <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #e5ece7">
+    <span style="overflow-wrap:anywhere"><strong dir="ltr">${esc(row.email)}</strong><small class="muted" style="display:block;margin-top:5px">${row.role==='owner'?'مالك المتجر':'موظف'}</small></span>
+    ${row.role==='staff'?`<button type="button" class="danger" data-remove-staff="${esc(row.user_id)}" data-staff-email="${esc(row.email)}">إزالة الصلاحية</button>`:''}
+   </div>`).join('');
+ },
+ installMemberUI(){
+  if($('#cloud-members'))return;
+  const button=document.createElement('button');button.type='button';button.id='cloud-members';button.className='secondary';button.textContent='الموظفون';button.hidden=true;$('#cloud-logout').before(button);
+  const dialog=document.createElement('dialog');dialog.id='cloud-members-dialog';
+  dialog.innerHTML=`
+   <div class="dialog-head"><h2>إدارة الموظفين</h2><button type="button" class="close" data-close aria-label="إغلاق">×</button></div>
+   <p class="muted">الموظف يستخدم حساباً منفصلاً ويستطيع تعديل المخزون وتسجيل المبيعات. إدارة الموظفين متاحة للمالك فقط.</p><p class="muted">أنشئ حساب الموظف أولاً في لوحة Supabase ضمن Authentication → Users → Add user → Create user، مع بريد مؤكّد وكلمة مرور خاصة به، ثم أضف بريده هنا. روابط الدعوة غير مدعومة في هذه النسخة.</p>
+   <form id="cloud-add-staff"><label>البريد الإلكتروني لحساب الموظف<input name="email" type="email" required autocomplete="off" dir="ltr"></label><button type="submit" class="primary">إضافة الموظف</button></form>
+   <p id="cloud-member-error" class="error" role="alert"></p><div id="cloud-member-list"></div>`;
+  document.body.append(dialog);
+  button.onclick=async()=>{
+   if(!this.ready||this.role!=='owner')return say('إدارة الموظفين متاحة للمالك فقط.');
+   $('#cloud-member-error').textContent='';dialog.showModal();
+   try{await this.loadMembers();}catch(error){$('#cloud-member-error').textContent=error.message;$('#cloud-member-list').textContent='';if(error.status===403)this.accessDenied(error.message);}
+  };
+  $('#cloud-add-staff').onsubmit=async event=>{
+   event.preventDefault();const form=event.target,submit=form.querySelector('[type=submit]');if(submit.disabled)return;if(!this.ready||this.role!=='owner')return say('إدارة الموظفين متاحة للمالك فقط.');
+   submit.disabled=true;$('#cloud-member-error').textContent='';
+   try{await this.api('POST','/rest/v1/rpc/kenz_add_staff',{staff_email:form.elements.email.value.trim()});form.reset();await this.loadMembers();say('تمت إضافة الموظف إلى المتجر.');}
+   catch(error){$('#cloud-member-error').textContent=error.message;if(error.status===403)this.accessDenied(error.message);}
+   finally{submit.disabled=false;}
+  };
+  $('#cloud-member-list').onclick=async event=>{
+   const remove=event.target.closest('[data-remove-staff]');if(!remove||remove.disabled)return;if(!this.ready||this.role!=='owner')return say('إدارة الموظفين متاحة للمالك فقط.');
+   if(!confirm(`إزالة صلاحية الموظف ${remove.dataset.staffEmail} من هذا المتجر؟`))return;
+   remove.disabled=true;$('#cloud-member-error').textContent='';
+   try{await this.api('POST','/rest/v1/rpc/kenz_remove_staff',{staff_user_id:remove.dataset.removeStaff});await this.loadMembers();say('تمت إزالة صلاحية الموظف.');}
+   catch(error){$('#cloud-member-error').textContent=error.message;if(error.status===403)this.accessDenied(error.message);}
+   finally{remove.disabled=false;}
+  };
+ },
+ async boot(){
+  $('main').hidden=true;
+  const panel=document.createElement('section');panel.id='cloud-auth';panel.style.cssText='max-width:470px;margin:40px auto;padding:25px;background:white;border:1px solid #dce5de;border-radius:12px';
+  panel.innerHTML=`
+   <h1>Kenz Kids</h1><p class="muted">سجّل الدخول بحسابك لعرض مخزون المتجر. يمكن للمالك والموظف استخدام حسابين منفصلين.</p>
+   <form id="cloud-login"><label>البريد الإلكتروني<input name="email" type="email" required autocomplete="username" dir="ltr"></label><label>كلمة المرور<input name="password" type="password" required autocomplete="current-password"></label>
+   <p id="cloud-auth-error" class="error" role="alert"></p><button class="primary" type="submit">تسجيل الدخول</button><button class="secondary" type="button" id="cloud-auth-retry" hidden>إعادة الاتصال</button></form>`;
+  $('main').before(panel);
+  $('main').insertAdjacentHTML('afterbegin',`
+   <section class="backup" style="margin:0 0 20px"><div><strong id="cloud-user"></strong><p id="cloud-status" class="muted"></p></div><div class="backup-actions">
+   <button class="secondary" id="cloud-sync" type="button">مزامنة الآن</button><button class="secondary" id="cloud-migrate" type="button" hidden>نقل بيانات هذا المتصفح</button><button class="secondary" id="cloud-logout" type="button">تسجيل الخروج</button></div></section>`);
+  this.installMemberUI();
+  $('#cloud-sync').onclick=async()=>{
+   if(this.writing)return say('انتظر اكتمال الحفظ أولاً.');
+   const hasEditor=Boolean(document.querySelector('dialog[open]'));if(hasEditor&&!confirm('التحديث سيغلق النموذج الحالي دون حفظه. متابعة؟'))return;
+   try{await this.load({closeEditors:hasEditor});}catch(error){this.status(error.message);say(error.message);}
+  };
+  $('#cloud-migrate').onclick=async()=>{
+   const source=this.localSnapshot();if(!source)return say('لم يتم العثور على بيانات محلية سليمة.');
+   if(!confirm(`نقل ${source.items.length} أصناف و${source.orders.length} طلبات من هذا المتصفح إلى الحساب؟ ستُستبدل البيانات الموجودة في الحساب بالكامل. صدّر نسخة منها أولاً إن احتجتها. لن تُحذف النسخة المحلية.`))return;
+   try{await save(source);say('تم نقل البيانات إلى الحساب السحابي.');}catch(error){say(error.message);}
+  };
+  $('#cloud-logout').onclick=async()=>{
+   if(this.writing)return say('انتظر اكتمال الحفظ أولاً.');const token=this.session?.access_token;this.signOutLocal();
+   if(token){try{await this.request('POST','/auth/v1/logout?scope=local',{},token);}catch{}}
+  };
+  $('#cloud-auth-retry').onclick=async()=>{try{$('#cloud-auth-error').textContent='جارٍ الاتصال…';await this.load();}catch(error){$('#cloud-auth-error').textContent=error.message;}};
+  $('#cloud-login').onsubmit=async event=>{
+   event.preventDefault();const form=event.target,button=form.querySelector('[type=submit]');if(button.disabled)return;button.disabled=true;$('#cloud-auth-error').textContent='';const attempt=this.epoch;
+   try{
+    const result=await this.request('POST','/auth/v1/token?grant_type=password',{email:form.elements.email.value.trim(),password:form.elements.password.value});
+    if(attempt!==this.epoch)return;this.begin(result);form.elements.password.value='';await this.load();
+   }catch(error){$('#cloud-auth-error').textContent=[400,401].includes(error.status)?'تعذّر تسجيل الدخول. تأكد من البريد وكلمة المرور.':error.message;}
+   finally{button.disabled=false;}
+  };
+  try{this.checkConfig();}catch(error){$('#cloud-auth-error').textContent=error.message;$('#cloud-login [type=submit]').disabled=true;return;}
+  window.addEventListener('storage',event=>{
+   if(event.key!==this.authKey&&event.key!==null)return;
+   if(!event.newValue)return this.signOutLocal('تم تسجيل الخروج من نافذة أخرى.',false);
+   try{
+    const incoming=this.normalizeSession(JSON.parse(event.newValue));
+    if(incoming.user.id===this.session?.user.id){this.session=incoming;return;}
+    this.begin(incoming,false);this.load().catch(error=>{$('#cloud-auth-error').textContent=error.message;});
+   }catch{this.signOutLocal('الجلسة المحفوظة غير صالحة. سجّل الدخول مجدداً.',false);}
+  });
+  setInterval(()=>this.poll(),15000);window.addEventListener('focus',()=>this.poll());document.addEventListener('visibilitychange',()=>{if(!document.hidden)this.poll();});
+  try{const raw=localStorage.getItem(this.authKey);if(!raw)return;this.begin(JSON.parse(raw),false);await this.load();}catch(error){$('#cloud-auth-error').textContent=error.message;}
+ }
+};
+
+Cloud.boot();
 </script>
 </body>
 </html>
