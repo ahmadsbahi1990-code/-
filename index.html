@@ -186,21 +186,19 @@ function saleTotal(){
 }
 function openSale(id){
  const available=state.items.filter(i=>i.quantity>0);if(!available.length){say('أضيفي قطعاً متوفرة إلى المخزون أولاً.');return;}
- $('#sale-form').reset();$('#sale-error').textContent='';$('#sale-item').innerHTML=available.map(i=>`<option value="${esc(i.id)}">${esc(i.model)} · ${esc(i.color)} · ${esc(i.size)} (المتوفر: ${fmt(i.quantity)})</option>`).join('');
+ $('#sale-form').reset();$('#sale-form').dataset.requestId=newId();$('#sale-error').textContent='';$('#sale-item').innerHTML=available.map(i=>`<option value="${esc(i.id)}">${esc(i.model)} · ${esc(i.color)} · ${esc(i.size)} (المتوفر: ${fmt(i.quantity)})</option>`).join('');
  if(id)$('#sale-item').value=id;saleTotal();$('#sale-dialog').showModal();
 }
 $('#sale-form').addEventListener('input',saleTotal);$('#sale-form').addEventListener('change',saleTotal);
 $('#sale-form').addEventListener('submit',async e=>{
- e.preventDefault();const v=Object.fromEntries(new FormData(e.target));
+ e.preventDefault();const form=e.currentTarget,requestId=form.dataset.requestId,epoch=Cloud.epoch,storeId=Cloud.storeId;
+ const values=Object.fromEntries(new FormData(form));
  try{
-  await update(next=>{
-   const item=next.items.find(i=>i.id===v.itemId),quantity=Number(v.quantity);if(!item||!Number.isSafeInteger(quantity)||quantity<1||quantity>item.quantity)throw Error('الكمية المطلوبة غير متوفرة.');
-   const number=next.orders.reduce((max,o)=>Math.max(max,o.number),0)+1;
-   next.orders.push({id:newId(),number,itemId:item.id,model:item.model,photo:item.photo||'',color:item.color,size:item.size,price:item.price,quantity,deliveryFee:round(Number(v.deliveryFee)),customer:v.customer.trim(),phone:v.phone.trim(),address:v.address.trim(),notes:v.notes.trim(),status:v.status,payment:v.payment,date:new Date().toISOString()});
-   item.quantity-=quantity;
-  });
-  $('#sale-dialog').close();setView('orders');say('تم تسجيل البيع وخصم الكمية سحابياً');
- }catch(error){$('#sale-error').textContent=error.message;}
+  const result=await Cloud.createSale(values,requestId);
+  if(epoch!==Cloud.epoch||storeId!==Cloud.storeId)return;
+  if(form.dataset.requestId===requestId)$('#sale-dialog').close();
+  setView('orders');say(result.message);
+ }catch(error){if(epoch===Cloud.epoch&&storeId===Cloud.storeId&&form.dataset.requestId===requestId)$('#sale-error').textContent=error.message;}
 });
 function openOrder(id){
  const o=state.orders.find(o=>o.id===id),f=$('#order-form');if(!o)return;
@@ -312,7 +310,7 @@ const Cloud={
    if(!response.ok){
     const backendMessage=typeof result?.message==='string'&&/[\u0600-\u06ff]/.test(result.message)?result.message.slice(0,500):'';
     const error=Error(backendMessage||(response.status===403?'حسابك غير مخوّل للوصول إلى هذا المتجر.':response.status===404?'لم يتم العثور على الحساب أو البيانات المطلوبة.':response.status===409?'تعارضت العملية مع بيانات موجودة.':response.status===429?'طلبات كثيرة. انتظر قليلاً ثم حاول مجدداً.':'تعذّر إكمال الطلب السحابي.'));
-    error.status=response.status;error.code=result?.code;throw error;
+    error.status=response.status;error.code=typeof result?.code==='string'?result.code.slice(0,100):'';error.serverMessage=typeof result?.message==='string'?result.message.slice(0,800):'';throw error;
    }
    return result;
   }catch(error){if(error.status)throw error;throw Error(error.name==='AbortError'?'انتهت مهلة الاتصال. تحقّق من الإنترنت ثم أعد التحديث.':'تعذّر الاتصال بقاعدة البيانات. تحقّق من الإنترنت.');}
@@ -357,6 +355,75 @@ const Cloud={
    throw error;
   }finally{if(epoch===this.epoch&&sequence===this.sequence)this.loading=false;}
  },
+ async createSale(values,requestId){
+  if(!this.ready||this.uncertain)throw Error('حدّث البيانات من زر «مزامنة الآن» قبل تسجيل البيع.');
+  if(this.writing||this.loading)throw Error('انتظر اكتمال المزامنة الحالية أولاً.');
+  const epoch=this.epoch,expected=this.revision,expectedStore=this.storeId;
+  const body={
+   expected_store_id:expectedStore,expected_revision:expected,request_id:requestId,
+   item_id:String(values.itemId||''),quantity:Number(values.quantity),delivery_fee:round(Number(values.deliveryFee)),
+   customer:String(values.customer||'').trim(),phone:String(values.phone||'').trim(),
+   address:String(values.address||'').trim(),notes:String(values.notes||'').trim(),
+   status:String(values.status||''),payment:String(values.payment||'')
+  };
+  const item=state.items.find(i=>i.id===body.item_id);
+  if(!validText(requestId,100))throw Error('أغلق نافذة البيع وافتحها مجدداً.');
+  if(!item||!Number.isSafeInteger(body.quantity)||body.quantity<1||body.quantity>item.quantity)throw Error('الكمية المطلوبة غير متوفرة.');
+  if(!validNumber(body.delivery_fee,1e9))throw Error('رسوم التوصيل غير صالحة.');
+  if(!validText(body.customer,100)||!validText(body.phone,40,false)||!validText(body.address,500,false)||!validText(body.notes,500,false))throw Error('راجعي بيانات العميل وأطوال الحقول.');
+  if(!statuses.slice(0,3).includes(body.status)||!payments.includes(body.payment))throw Error('حالة الطلب أو الدفع غير صالحة.');
+  let receipt=null;
+  const acknowledgedMessage='تم تأكيد تسجيل البيع، لكن تعذّر تحديث العرض. اضغط «مزامنة الآن» قبل أي عملية أخرى.';
+  this.writing=true;this.sequence++;this.setWriteBusy(true);this.status('جارٍ تسجيل البيع في الحساب…');
+  try{
+   const result=await this.api('POST','/rest/v1/rpc/kenz_create_sale',body);
+   if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');
+   if(!result||result.store_id!==expectedStore||!['owner','staff'].includes(result.role)||!Number.isSafeInteger(result.revision)||result.revision<0||typeof result.duplicate!=='boolean'||!validNumber(result.new_quantity,1e6,true)||!result.order||result.order.id!==requestId||result.order.itemId!==body.item_id)throw Error('استجابة تسجيل البيع غير صالحة؛ حدّث البيانات للتحقّق من النتيجة.');
+   receipt=result;
+   let synchronized=false;
+   // A compact receipt can update this exact revision. Replays and revision gaps need a full refresh.
+   if(!receipt.duplicate&&receipt.revision===expected+1&&this.storeId===expectedStore&&this.revision===expected){
+    try{
+     const currentItem=state.items.find(i=>i.id===body.item_id);
+     if(!currentItem||receipt.order.quantity!==body.quantity||receipt.new_quantity!==currentItem.quantity-body.quantity||state.orders.some(o=>o.id===receipt.order.id||o.number===receipt.order.number))throw Error('يلزم تحميل آخر بيانات المتجر.');
+     const next={...state,items:state.items.map(i=>i.id===body.item_id?{...i,quantity:receipt.new_quantity}:i),orders:[...state.orders,receipt.order]};
+     validate(next);
+     state=next;this.revision=receipt.revision;this.storeId=receipt.store_id;this.role=receipt.role;this.uncertain=false;
+     render();this.updateMigrationButton();this.updateAccessUI();synchronized=true;
+    }catch{}
+   }
+   if(!synchronized){
+    this.uncertain=true;this.closeEditors();
+    try{synchronized=await this.load({closeEditors:true,duringWrite:true})===true;}catch{}
+    if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');
+    if(!synchronized)this.uncertain=true;
+   }
+   const message=synchronized?(receipt.duplicate?'هذا البيع مسجّل مسبقاً؛ تم تحديث البيانات.':'تم تسجيل البيع وخصم الكمية سحابياً.'):acknowledgedMessage;
+   this.status(message);
+   return {confirmed:true,synchronized,duplicate:receipt.duplicate,message};
+  }catch(error){
+   if(epoch!==this.epoch)throw error;
+   if(receipt){
+    this.uncertain=true;this.status(acknowledgedMessage);
+    return {confirmed:true,synchronized:false,duplicate:receipt.duplicate,message:acknowledgedMessage};
+   }
+   if(error.status===403){const message=error.message;this.accessDenied(message);say(message);throw Error(message);}
+   if(error.status===409){
+    this.uncertain=true;this.closeEditors();
+    try{await this.load({closeEditors:true,duringWrite:true});}catch{this.status('تعذّر تحميل آخر تعديل. اضغط «مزامنة الآن».');}
+    const message='تعذّر اعتماد هذه المحاولة بسبب تعارض. راجع آخر الطلبات والمخزون قبل إعادة العملية.';say(message);throw Error(message);
+   }
+   const diagnostic=[Number.isInteger(error.status)?'HTTP '+error.status:'',error.code?'Code '+error.code:'',error.serverMessage||error.message].filter(Boolean).join(' | ');
+   if([400,401,404,405,406,413,415,422,429].includes(error.status)){
+    this.uncertain=false;
+    const message='رفض الخادم تسجيل البيع؛ لم يُعتمد هذا التعديل. '+diagnostic;
+    this.status(message);throw Error(message);
+   }
+   this.uncertain=true;
+   const message='لم يتم تأكيد نتيجة تسجيل البيع. اضغط «مزامنة الآن» وراجع الطلبات قبل إعادة العملية. '+diagnostic;
+   this.status(message);throw Error(message);
+  }finally{if(epoch===this.epoch){this.writing=false;this.loading=false;this.setWriteBusy(false);}}
+ },
  async save(next){
   if(!this.ready||this.uncertain)throw Error('حدّث البيانات من زر «مزامنة الآن» قبل الحفظ.');
   if(this.writing||this.loading)throw Error('انتظر اكتمال المزامنة الحالية أولاً.');
@@ -377,8 +444,14 @@ const Cloud={
     try{await this.load({closeEditors:true,duringWrite:true});}catch{this.status('تعذّر تحميل آخر تعديل. اضغط «مزامنة الآن».');}
     const message='تغيّرت البيانات أو المتجر من جهاز آخر؛ لم يُعتمد تعديلك. راجع آخر مخزون وأعد العملية.';say(message);throw Error(message);
    }
+   const diagnostic=[Number.isInteger(error.status)?'HTTP '+error.status:'',error.code?'Code '+error.code:'',error.serverMessage||error.message].filter(Boolean).join(' | ');
+   if([400,401,404,405,406,413,415,422,429].includes(error.status)){
+    this.uncertain=false;
+    const message='رفض الخادم الحفظ؛ لم يُعتمد هذا التعديل. '+diagnostic;
+    this.status(message);throw Error(message);
+   }
    this.uncertain=true;this.status('لم يتم تأكيد نتيجة الحفظ. اضغط «مزامنة الآن» قبل المتابعة.');
-   throw Error('لم يتم تأكيد نتيجة الحفظ. حدّث البيانات قبل إعادة العملية لتفادي تكرارها.');
+   throw Error('لم يتم تأكيد نتيجة الحفظ. حدّث البيانات قبل إعادة العملية لتفادي تكرارها. '+diagnostic);
   }finally{if(epoch===this.epoch){this.writing=false;this.loading=false;this.setWriteBusy(false);}}
  },
  localSnapshot(){try{const raw=localStorage.getItem(STORE);if(!raw)return null;const data=validate(JSON.parse(raw));return data.items.length||data.orders.length?data:null;}catch{return null;}},
