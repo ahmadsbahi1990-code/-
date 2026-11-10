@@ -10,6 +10,11 @@ function fixture() {
   return { version: 1, items, orders };
 }
 const initial = fixture();
+// Exercise the same sale transport against both metadata versions.
+if (process.env.KENZ_PAYLOAD_VERSION === '2') {
+  initial.version = 2;
+  for (const record of [...initial.items, ...initial.orders]) record.photo = '';
+}
 const initialBytes = Buffer.byteLength(JSON.stringify(initial));
 
 (async () => {
@@ -39,13 +44,13 @@ const initialBytes = Buffer.byteLength(JSON.stringify(initial));
         const path = new URL(route.request().url()).pathname;
         const body = route.request().postDataJSON();
         if (path === '/auth/v1/token') return reply(route, { access_token: 'test-access-token', refresh_token: 'test-refresh-token', expires_in: 3600, user: { id: OWNER, email: 'owner@example.invalid' } });
-        if (path === '/rest/v1/rpc/kenz_get_state') {
+        if (path === '/rest/v1/rpc/kenz_get_state_v2') {
           reads++;
           if (mode === 'ack-reload-fail' && reads > 1) return reply(route, { message: 'fixture read unavailable' }, 500);
           return reply(route, envelope());
         }
         if (path === '/rest/v1/kenz_inventory_state') return reply(route, [{ store_id: STORE, revision: db.revision }]);
-        if (path === '/rest/v1/rpc/kenz_save_state') {
+        if (['/rest/v1/rpc/kenz_save_state', '/rest/v1/rpc/kenz_save_state_v2'].includes(path)) {
           oldWrites++;
           assert.equal(body.expected_revision, db.revision);
           db.payload = body.new_payload; db.revision++;
@@ -160,6 +165,6 @@ const initialBytes = Buffer.byteLength(JSON.stringify(initial));
       await api.page.waitForFunction(() => Cloud.session === null);
       const s = await snapshot(api.page); assert.equal(s.orders, 0); assert.equal(s.mainHidden, true);
     });
-    console.log(JSON.stringify({ browserScenarios: passed, fixtureBytes: initialBytes, externalRequests: 0 }));
+    console.log(JSON.stringify({ browserScenarios: passed, fixtureBytes: initialBytes, payloadVersion: initial.version, externalRequests: 0 }));
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

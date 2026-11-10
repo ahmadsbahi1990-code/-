@@ -69,6 +69,7 @@ header{background:var(--green);color:white;padding:24px max(20px,calc((100% - 11
 <div class="form-actions"><button type="submit" class="primary">حفظ التحديث</button><button type="button" class="danger" id="cancel-order">إلغاء الطلب وإرجاع الكمية</button></div>
 </form></dialog>
 <div id="message" role="status" hidden></div>
+<script src="photos.js?v=20261110"></script>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -88,9 +89,10 @@ function newId(){
 }
 function validText(v,max,required=true){return typeof v==='string'&&v.length<=max&&(!required||v.trim().length>0);}
 function validNumber(v,max,integer=false){return typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max&&(!integer||Number.isSafeInteger(v));}
-function validPhoto(v){return v===undefined||v===''||(typeof v==='string'&&v.length<=400000&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(v));}
-function validate(d){
- if(!d||d.version!==1||!Array.isArray(d.items)||!Array.isArray(d.orders))throw Error('صيغة النسخة غير صالحة.');
+function validPhoto(v){return v===undefined||v===''||Photos.isInline(v)||Photos.isReference(v);}
+function validate(d,stored=false){
+ if(!d||![1,2].includes(d.version)||!Array.isArray(d.items)||!Array.isArray(d.orders))throw Error('صيغة النسخة غير صالحة.');
+ if(stored&&[...d.items,...d.orders].some(row=>row.photo&&(d.version===2?!Photos.isReference(row.photo):!Photos.isInline(row.photo))))throw Error('صيغة صور البيانات المحفوظة غير صالحة.');
  const ids=new Set(),keys=new Set(),orderIds=new Set(),numbers=new Set();
  for(const i of d.items){
   if(!i||!validText(i.id,100)||ids.has(i.id)||!validText(i.model,100)||!validText(i.color,60)||!validText(i.size,40)||!validNumber(i.price,1e9)||!validNumber(i.quantity,1e6,true)||!validPhoto(i.photo))throw Error('توجد بيانات مخزون غير صالحة.');
@@ -109,8 +111,8 @@ function say(text){
 }
 async function save(next){return Cloud.save(next);}
 async function update(change){const next=JSON.parse(JSON.stringify(state));change(next);await save(next);}
-function imageMarkup(p,label){return p?`<img src="${esc(p)}" alt="${esc(label)}" loading="lazy">`:'<span class="placeholder">♧</span>';}
-function showPhoto(selector,p){$(selector).hidden=!p;if(p)$(selector).src=p;else $(selector).removeAttribute('src');}
+function imageMarkup(p,label){return Photos.imageMarkup(p,label);}
+function showPhoto(selector,p){Photos.show(selector,p);}
 function setView(next){
  view=next;$('#inventory-view').hidden=next!=='inventory';$('#orders-view').hidden=next!=='orders';
  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));
@@ -136,12 +138,14 @@ function renderInventory(){
  const items=state.items.filter(i=>[i.model,i.color,i.size].join(' ').toLowerCase().includes(q)&&(!$('#color-filter').value||i.color===$('#color-filter').value)&&(!$('#size-filter').value||i.size===$('#size-filter').value)&&(!stock||(stock==='available'&&i.quantity>0)||(stock==='low'&&i.quantity===1)||(stock==='out'&&i.quantity===0))).sort((a,b)=>a.model.localeCompare(b.model,'ar',{numeric:true})||a.color.localeCompare(b.color,'ar')||a.size.localeCompare(b.size,'ar',{numeric:true}));
  $('#inventory-body').innerHTML=items.map(i=>`<tr><td><div class="model">${imageMarkup(i.photo,i.model)}<strong>${esc(i.model)}</strong></div></td><td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${fmt(i.price)}</td><td>${fmt(i.quantity)}</td><td><span class="status ${i.quantity===0?'out':i.quantity===1?'low':''}">${i.quantity===0?'نفد المخزون':i.quantity===1?'قطعة واحدة متبقية':'متوفر'}</span></td><td><div class="actions"><button type="button" data-sell="${esc(i.id)}" ${i.quantity===0?'disabled':''}>بيع</button><button type="button" data-edit="${esc(i.id)}">تعديل</button></div></td></tr>`).join('');
  $('#inventory-empty').hidden=items.length>0;$('#inventory-summary').textContent=`عرض ${fmt(items.length)} من ${fmt(state.items.length)} أصناف. تُخصم الكمية تلقائياً عند تسجيل البيع.`;
+ Photos.refresh($('#inventory-body'));
 }
 function renderOrders(){
  const q=$('#order-search').value.trim().toLowerCase(),status=$('#status-filter').value;
  const orders=state.orders.filter(o=>[o.customer,o.phone,o.model,o.number,'KK-'+o.number].join(' ').toLowerCase().includes(q)&&(!status||o.status===status)).sort((a,b)=>b.number-a.number);
  $('#orders-body').innerHTML=orders.map(o=>`<tr><td><strong dir="ltr">KK-${o.number}</strong><small>${new Date(o.date).toLocaleDateString('ar')}</small></td><td><strong>${esc(o.customer)}</strong><small dir="ltr">${esc(o.phone)}</small></td><td><div class="model">${imageMarkup(o.photo,o.model)}<span>${esc(o.model)}<small>${esc(o.color)} · ${esc(o.size)} · ${fmt(o.quantity)} قطعة</small></span></div></td><td>${fmt(round(o.quantity*o.price+o.deliveryFee))}<small>التوصيل: ${fmt(o.deliveryFee)}</small></td><td><span class="status ${o.status==='ملغي'?'out':o.status==='تم التوصيل'?'':'low'}">${o.status}</span><small>${o.payment}${o.status==='ملغي'&&o.payment==='مدفوع'?' · تابعي رد المبلغ':''}</small></td><td><div class="actions"><button type="button" data-order="${esc(o.id)}">التفاصيل</button></div></td></tr>`).join('');
  $('#orders-empty').hidden=orders.length>0;
+ Photos.refresh($('#orders-body'));
 }
 function photoPreview(){$('#photo-preview').hidden=!photo;showPhoto('#photo-preview img',photo);}
 function openItem(id){
@@ -242,22 +246,31 @@ for(const type of ['item','sale','order']){
   if(field.validity.valueMissing)text=`يرجى تعبئة «${label}» قبل الحفظ.`;else if(field.validity.rangeUnderflow)text=`قيمة «${label}» يجب ألا تقل عن ${field.min}.`;else if(field.validity.rangeOverflow)text=`قيمة «${label}» يجب ألا تتجاوز ${field.max}.`;else if(field.validity.stepMismatch)text=field.step==='1'?`أدخلي عدداً صحيحاً في «${label}».`:`أدخلي السعر بمنزلتين عشريتين كحد أقصى في «${label}».`;$('#'+type+'-error').textContent=text;
  },true);
 }
-$('#export').onclick=()=>{
+$('#export').onclick=async()=>{
  if(!Cloud.ready||Cloud.uncertain||Cloud.writing||Cloud.loading){say('حدّث البيانات من «مزامنة الآن» وانتظر اكتمال الحفظ قبل تصدير النسخة.');return;}
- const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kenz-kids-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say('تم تصدير النسخة. احتفظي بها في مكان آمن؛ تتضمن بيانات العملاء والصور.');
+ const epoch=Cloud.epoch,storeId=Cloud.storeId,snapshot=JSON.parse(JSON.stringify(state));
+ Cloud.writing=true;Cloud.sequence++;Cloud.setWriteBusy(true);Cloud.status('جارٍ تجهيز النسخة الاحتياطية مع الصور…');
+ try{
+  const backup=await Photos.exportBackup(snapshot,{epoch,storeId});
+  if(!Cloud.isCurrent(epoch,storeId))return;
+  const url=URL.createObjectURL(backup.blob),a=document.createElement('a');a.href=url;a.download=backup.filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  Cloud.status('تم تجهيز النسخة الاحتياطية مع الصور.');say('تم تصدير النسخة. احتفظي بها في مكان آمن؛ تتضمن بيانات العملاء والصور.');
+ }catch(error){if(Cloud.isCurrent(epoch,storeId)){Cloud.status(error.message);say('تعذّر تصدير النسخة: '+error.message);}}
+ finally{if(Cloud.isCurrent(epoch,storeId)){Cloud.writing=false;Cloud.setWriteBusy(false);}}
 };
 $('#import').onclick=()=>$('#import-file').click();
 $('#import-file').addEventListener('change',async e=>{
  const file=e.target.files[0];if(!file)return;const epoch=Cloud.epoch,storeId=Cloud.storeId;
  try{
   if(!Cloud.ready||Cloud.uncertain||Cloud.writing||Cloud.loading)throw Error('حدّث البيانات وانتظر اكتمال المزامنة قبل الاستعادة.');
-  if(file.size>10*1024*1024)throw Error('الملف أكبر من 10 ميغابايت.');
-  const next=validate(JSON.parse(await file.text()));
-  if(epoch!==Cloud.epoch||storeId!==Cloud.storeId)throw Error('تغيّر الحساب أو المتجر أثناء قراءة الملف. أعد اختيار الملف.');
+  if(state.version!==2)throw Error('فعّل تخزين الصور الجديد من الزر أعلى الصفحة أولاً، ثم استعد النسخة.');
+  if(file.size>100*1024*1024)throw Error('الملف أكبر من 100 ميغابايت.');
+  const archive=JSON.parse(await file.text()),next=validate(archive?.format==='kenz-backup'?archive.payload:archive);
+  if(!Cloud.isCurrent(epoch,storeId))throw Error('تغيّر الحساب أو المتجر أثناء قراءة الملف. أعد اختيار الملف.');
   if(!confirm(`استعادة ${next.items.length} أصناف و${next.orders.length} طلبات في متجر الحساب ${Cloud.session.user.email}؟ ستُستبدل البيانات الحالية بالكامل. صدّري نسخة منها أولاً إن كنت تحتاجينها.`))return;
-  if(epoch!==Cloud.epoch||storeId!==Cloud.storeId)throw Error('تغيّر الحساب أو المتجر. أعد اختيار الملف.');
-  await save(next);say('تمت استعادة النسخة الاحتياطية سحابياً');
- }catch(error){say('لم يتم الاستيراد: '+(error instanceof SyntaxError?'الملف ليس نسخة JSON صالحة.':error.message));}
+  if(!Cloud.isCurrent(epoch,storeId))throw Error('تغيّر الحساب أو المتجر. أعد اختيار الملف.');
+  await Cloud.save(next,{backupFile:file});say('تمت استعادة النسخة الاحتياطية والصور سحابياً');
+ }catch(error){if(Cloud.isCurrent(epoch,storeId))say('لم يتم الاستيراد: '+(error instanceof SyntaxError?'الملف ليس نسخة JSON صالحة.':error.message));}
  finally{e.target.value='';}
 });
 $('#today').textContent=new Date().toLocaleDateString('ar',{year:'numeric',month:'short',day:'numeric'});
@@ -277,18 +290,19 @@ const Cloud={
  remember(value){this.session=this.normalizeSession(value);try{localStorage.setItem(this.authKey,JSON.stringify(this.session));}catch{}},
  closeEditors(){photoToken++;document.querySelectorAll('dialog[open]').forEach(d=>d.close());for(const id of ['item-form','sale-form','order-form']){const form=$('#'+id);if(form)form.reset();}for(const id of ['order-details','cloud-member-list']){const node=$('#'+id);if(node)node.textContent='';}photo='';photoPreview();showPhoto('#sale-photo',null);showPhoto('#order-photo',null);},
  status(text){$('#cloud-status').textContent=text;},
+ isCurrent(epoch,storeId=this.storeId){return Boolean(this.session)&&epoch===this.epoch&&storeId===this.storeId;},
  setWriteBusy(value){
   for(const id of ['item','sale','order']){const b=$(`#${id}-form [type=submit]`);if(b)b.disabled=value;}
-  for(const id of ['cloud-migrate','cloud-sync','cloud-logout']){const b=$('#'+id);if(b)b.disabled=value;}
+  for(const id of ['cloud-migrate','cloud-sync','cloud-logout','cloud-photo-migrate','export','import']){const b=$('#'+id);if(b)b.disabled=value;}
  },
  begin(value,persist=true){
-  const normalized=this.normalizeSession(value);this.epoch++;this.sequence++;this.session=normalized;if(persist)this.remember(normalized);
+  const normalized=this.normalizeSession(value);this.epoch++;this.sequence++;Photos.reset();this.session=normalized;if(persist)this.remember(normalized);
   this.revision=-1;this.role=null;this.storeId=null;this.ready=false;this.uncertain=false;this.writing=false;this.loading=false;this.polling=false;this.refreshPromise=null;
   state=blank();this.closeEditors();this.setWriteBusy(false);this.updateAccessUI();
   $('main').hidden=true;$('#cloud-auth').hidden=false;$('#cloud-auth-retry').hidden=false;$('#cloud-auth-error').textContent='';render();
  },
  signOutLocal(message='',persist=true){
-  this.epoch++;this.sequence++;this.session=null;this.revision=-1;this.role=null;this.storeId=null;this.ready=false;this.uncertain=false;this.writing=false;this.loading=false;this.polling=false;this.refreshPromise=null;state=blank();
+  this.epoch++;this.sequence++;Photos.reset();this.session=null;this.revision=-1;this.role=null;this.storeId=null;this.ready=false;this.uncertain=false;this.writing=false;this.loading=false;this.polling=false;this.refreshPromise=null;state=blank();
   if(persist){try{localStorage.removeItem(this.authKey);}catch{}}
   this.closeEditors();this.setWriteBusy(false);this.updateAccessUI();$('main').hidden=true;$('#cloud-auth').hidden=false;$('#cloud-auth-retry').hidden=true;$('#cloud-auth-error').textContent=message;$('#cloud-login').elements.password.value='';render();
  },
@@ -297,6 +311,7 @@ const Cloud={
   $('#cloud-auth-error').textContent=message;$('#cloud-auth-retry').hidden=!session;
  },
  updateAccessUI(){
+  this.updatePhotoUI();
   const owner=this.ready&&this.role==='owner';const button=$('#cloud-members');if(button)button.hidden=!owner;
   const label=$('#cloud-user');if(label)label.textContent=this.session?`${this.session.user.email} · ${this.role==='owner'?'مالك المتجر':this.role==='staff'?'موظف':'بانتظار الصلاحية'}`:'';
   if(!owner){const dialog=$('#cloud-members-dialog');if(dialog?.open)dialog.close();const list=$('#cloud-member-list');if(list)list.textContent='';const form=$('#cloud-add-staff');if(form)form.reset();}
@@ -338,22 +353,23 @@ const Cloud={
  },
  unpack(result){
   if(!result||!Number.isSafeInteger(result.revision)||result.revision<0||!['owner','staff'].includes(result.role)||typeof result.store_id!=='string'||!result.store_id)throw Error('استجابة المزامنة أو صلاحيات المتجر غير صالحة.');
-  return {revision:result.revision,payload:validate(result.payload),storeId:result.store_id,role:result.role};
+  return {revision:result.revision,payload:validate(result.payload,true),storeId:result.store_id,role:result.role};
  },
  async load({closeEditors=false,duringWrite=false}={}){
   if(!this.session)throw Error('سجّل الدخول أولاً.');if(this.writing&&!duringWrite)throw Error('انتظر اكتمال الحفظ أولاً.');
   const epoch=this.epoch,sequence=++this.sequence;this.loading=true;this.status('جارٍ تحميل البيانات المشتركة…');
   try{
-   const result=this.unpack(await this.api('POST','/rest/v1/rpc/kenz_get_state',{}));
+   const result=this.unpack(await this.api('POST','/rest/v1/rpc/kenz_get_state_v2',{}));
    if(epoch!==this.epoch||sequence!==this.sequence)return false;
    if(document.querySelector('dialog[open]')){if(!closeEditors){this.status('المزامنة مؤجلة أثناء تعديل البيانات.');return false;}this.closeEditors();}
+   if(this.storeId!==result.storeId)Photos.reset();
    state=result.payload;this.revision=result.revision;this.storeId=result.storeId;this.role=result.role;this.ready=true;this.uncertain=false;
    render();this.updateMigrationButton();this.updateAccessUI();$('main').hidden=false;$('#cloud-auth').hidden=true;
    this.status('تمت المزامنة السحابية · '+new Date().toLocaleTimeString('ar'));return true;
   }catch(error){
    if(epoch===this.epoch&&error.status===403)this.accessDenied(error.message);
    throw error;
-  }finally{if(epoch===this.epoch&&sequence===this.sequence)this.loading=false;}
+  }finally{if(epoch===this.epoch&&sequence===this.sequence){this.loading=false;this.updatePhotoUI();}}
  },
  async createSale(values,requestId){
   if(!this.ready||this.uncertain)throw Error('حدّث البيانات من زر «مزامنة الآن» قبل تسجيل البيع.');
@@ -424,14 +440,23 @@ const Cloud={
    this.status(message);throw Error(message);
   }finally{if(epoch===this.epoch){this.writing=false;this.loading=false;this.setWriteBusy(false);}}
  },
- async save(next){
+ async save(next,{backupFile}={}){
   if(!this.ready||this.uncertain)throw Error('حدّث البيانات من زر «مزامنة الآن» قبل الحفظ.');
   if(this.writing||this.loading)throw Error('انتظر اكتمال المزامنة الحالية أولاً.');
-  validate(next);if(new Blob([JSON.stringify(next)]).size>10*1024*1024)throw Error('البيانات والصور تجاوزت حد هذه النسخة (10 ميغابايت).');
+  validate(next);const version=state.version;
+  if(version===1&&next.version!==1)throw Error('فعّل تخزين الصور الجديد أولاً.');
+  if(version===1&&new Blob([JSON.stringify(next)]).size>10*1024*1024)throw Error('البيانات والصور تجاوزت حد النسخة القديمة. فعّل تخزين الصور الجديد.');
   const epoch=this.epoch,expected=this.revision,expectedStore=this.storeId;
-  this.writing=true;this.sequence++;this.setWriteBusy(true);this.status('جارٍ الحفظ في الحساب…');
+  let submitted=false;this.writing=true;this.sequence++;this.setWriteBusy(true);this.status('جارٍ الحفظ في الحساب…');
   try{
-   const result=this.unpack(await this.api('POST','/rest/v1/rpc/kenz_save_state',{expected_store_id:expectedStore,expected_revision:expected,new_payload:next}));
+   if(version===2){
+    const context={epoch,storeId:expectedStore,onProgress:(done,total)=>{if(this.isCurrent(epoch,expectedStore))this.status(`جارٍ تجهيز الصور ${done} / ${total}…`);}};
+    next=backupFile?await Photos.importBackup(backupFile,context):await Photos.preparePayload(next,context);
+   }
+   if(!this.isCurrent(epoch,expectedStore))throw Error('تغيّرت جلسة الدخول أو المتجر.');
+   validate(next,true);if(new Blob([JSON.stringify(next)]).size>10*1024*1024)throw Error('بيانات المخزون والطلبات تجاوزت 10 ميغابايت.');
+   submitted=true;
+   const result=this.unpack(await this.api('POST',version===2?'/rest/v1/rpc/kenz_save_state_v2':'/rest/v1/rpc/kenz_save_state',{expected_store_id:expectedStore,expected_revision:expected,new_payload:next}));
    if(epoch!==this.epoch)throw Error('تغيّرت جلسة الدخول.');
    if(result.storeId!==expectedStore){const error=Error('تغيّر المتجر المرتبط بالحساب.');error.status=409;throw error;}
    state=result.payload;this.revision=result.revision;this.storeId=result.storeId;this.role=result.role;this.uncertain=false;
@@ -444,6 +469,7 @@ const Cloud={
     try{await this.load({closeEditors:true,duringWrite:true});}catch{this.status('تعذّر تحميل آخر تعديل. اضغط «مزامنة الآن».');}
     const message='تغيّرت البيانات أو المتجر من جهاز آخر؛ لم يُعتمد تعديلك. راجع آخر مخزون وأعد العملية.';say(message);throw Error(message);
    }
+   if(!submitted){this.uncertain=false;this.status('لم يتم حفظ التعديل: '+error.message);throw error;}
    const diagnostic=[Number.isInteger(error.status)?'HTTP '+error.status:'',error.code?'Code '+error.code:'',error.serverMessage||error.message].filter(Boolean).join(' | ');
    if([400,401,404,405,406,413,415,422,429].includes(error.status)){
     this.uncertain=false;
@@ -453,6 +479,45 @@ const Cloud={
    this.uncertain=true;this.status('لم يتم تأكيد نتيجة الحفظ. اضغط «مزامنة الآن» قبل المتابعة.');
    throw Error('لم يتم تأكيد نتيجة الحفظ. حدّث البيانات قبل إعادة العملية لتفادي تكرارها. '+diagnostic);
   }finally{if(epoch===this.epoch){this.writing=false;this.loading=false;this.setWriteBusy(false);}}
+ },
+ installPhotoUI(){
+  $('nav').insertAdjacentHTML('beforebegin',`<section class="backup" id="cloud-photo-panel" hidden style="margin:0 0 20px"><div><strong>تخزين الصور الجديد</strong><p class="muted" id="cloud-photo-status"></p></div><button type="button" class="primary" id="cloud-photo-migrate">تفعيل تخزين الصور</button></section>`);
+  $('#cloud-photo-migrate').onclick=()=>this.migratePhotos().catch(error=>say(error.message));
+ },
+ updatePhotoUI(){
+  const panel=$('#cloud-photo-panel');if(!panel)return;
+  panel.hidden=!this.ready||state.version===2;
+  $('#cloud-photo-migrate').hidden=this.role!=='owner';
+  $('#cloud-photo-migrate').disabled=this.writing||this.loading||this.uncertain;
+  $('#cloud-photo-status').textContent=this.role==='owner'?'نقل صور المخزون والمبيعات القديمة إلى مساحة خاصة، مع الاحتفاظ بنسخة من البيانات الأصلية. أبقِ الصفحة مفتوحة حتى اكتمال النقل.':'يمكن لمالك المتجر تفعيل تخزين الصور الجديد. بيانات المتجر الحالية محفوظة.';
+ },
+ async migratePhotos(){
+  if(!this.ready||this.role!=='owner')throw Error('تفعيل تخزين الصور متاح لمالك المتجر فقط.');
+  if(this.writing||this.loading||this.uncertain)throw Error('أكمل المزامنة الحالية أولاً.');
+  if(state.version===2)return;
+  const epoch=this.epoch,expected=this.revision,storeId=this.storeId,snapshot=JSON.parse(JSON.stringify(state));let submitted=false;
+  this.writing=true;this.sequence++;this.closeEditors();this.setWriteBusy(true);
+  try{
+   this.status('جارٍ نقل الصور إلى مساحة التخزين الخاصة…');
+   const prepared=await Photos.uploadLegacy(snapshot,{epoch,storeId,onProgress:(done,total)=>{if(this.isCurrent(epoch,storeId))this.status(`جارٍ نقل الصور ${done} / ${total}…`);}});
+   validate(prepared,true);
+   if(!this.isCurrent(epoch,storeId))throw Error('تغيّرت جلسة الدخول أو المتجر.');
+   submitted=true;
+   const raw=await this.api('POST','/rest/v1/rpc/kenz_migrate_photos',{expected_store_id:storeId,expected_revision:expected}),result=this.unpack(raw);
+   if(!this.isCurrent(epoch,storeId))throw Error('تغيّرت جلسة الدخول أو المتجر.');
+   if(result.storeId!==storeId||result.payload.version!==2||result.revision<expected)throw Error('استجابة نقل الصور غير صالحة. حدّث البيانات للتحقق من النتيجة.');
+   state=result.payload;this.revision=result.revision;this.role=result.role;this.uncertain=false;
+   render();this.updateAccessUI();this.updateMigrationButton();
+   const stats=raw.migration,message=stats&&Number.isFinite(stats.before_bytes)&&Number.isFinite(stats.after_bytes)?`تم تفعيل تخزين الصور. حجم بيانات المتجر أصبح ${fmt(stats.after_bytes/1024)} كيلوبايت بدلاً من ${fmt(stats.before_bytes/1024)}. صور المبيعات القديمة محفوظة.`:'تم تفعيل تخزين الصور. صور المخزون والمبيعات القديمة محفوظة.';
+   this.status(message);say(message);
+  }catch(error){
+   if(!this.isCurrent(epoch,storeId))throw error;
+   if(error.status===403){this.accessDenied(error.message);throw error;}
+   if(error.status===409){this.uncertain=true;const refreshed=await this.load({closeEditors:true,duringWrite:true}).catch(()=>false);throw Error(refreshed?'تغيّرت بيانات المتجر أثناء النقل. تم تحميل آخر نسخة؛ اضغط تفعيل تخزين الصور مجدداً.':'تغيّرت بيانات المتجر أثناء النقل. اضغط «مزامنة الآن» قبل إعادة المحاولة.');}
+   this.uncertain=submitted&&![400,401,404,405,406,413,415,422,429].includes(error.status);
+   const message=this.uncertain?'لم يتم تأكيد نتيجة النقل. اضغط «مزامنة الآن» للتحقق قبل المتابعة.':'لم يكتمل نقل الصور؛ لم تُستبدل بيانات المتجر. '+error.message;
+   this.status(message);throw Error(message);
+  }finally{if(epoch===this.epoch){this.writing=false;this.loading=false;this.setWriteBusy(false);this.updatePhotoUI();}}
  },
  localSnapshot(){try{const raw=localStorage.getItem(STORE);if(!raw)return null;const data=validate(JSON.parse(raw));return data.items.length||data.orders.length?data:null;}catch{return null;}},
  updateMigrationButton(){$('#cloud-migrate').hidden=!this.localSnapshot();},
@@ -519,14 +584,14 @@ const Cloud={
   $('main').hidden=true;
   const panel=document.createElement('section');panel.id='cloud-auth';panel.style.cssText='max-width:470px;margin:40px auto;padding:25px;background:white;border:1px solid #dce5de;border-radius:12px';
   panel.innerHTML=`
-   <h1>Kenz Kids</h1><p class="muted">سجّل الدخول بحسابك لعرض مخزون المتجر. يمكن للمالك والموظف استخدام حسابين منفصلين.</p>
+   <h1>KENZ BUTIK DEPOSU</h1><p class="muted">سجّل الدخول بحسابك لعرض مخزون المتجر. يمكن للمالك والموظف استخدام حسابين منفصلين.</p>
    <form id="cloud-login"><label>البريد الإلكتروني<input name="email" type="email" required autocomplete="username" dir="ltr"></label><label>كلمة المرور<input name="password" type="password" required autocomplete="current-password"></label>
    <p id="cloud-auth-error" class="error" role="alert"></p><button class="primary" type="submit">تسجيل الدخول</button><button class="secondary" type="button" id="cloud-auth-retry" hidden>إعادة الاتصال</button></form>`;
   $('main').before(panel);
   $('main').insertAdjacentHTML('afterbegin',`
    <section class="backup" style="margin:0 0 20px"><div><strong id="cloud-user"></strong><p id="cloud-status" class="muted"></p></div><div class="backup-actions">
    <button class="secondary" id="cloud-sync" type="button">مزامنة الآن</button><button class="secondary" id="cloud-migrate" type="button" hidden>نقل بيانات هذا المتصفح</button><button class="secondary" id="cloud-logout" type="button">تسجيل الخروج</button></div></section>`);
-  this.installMemberUI();
+  this.installPhotoUI();this.installMemberUI();
   $('#cloud-sync').onclick=async()=>{
    if(this.writing)return say('انتظر اكتمال الحفظ أولاً.');
    const hasEditor=Boolean(document.querySelector('dialog[open]'));if(hasEditor&&!confirm('التحديث سيغلق النموذج الحالي دون حفظه. متابعة؟'))return;
